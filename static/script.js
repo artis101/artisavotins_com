@@ -89,32 +89,7 @@ class GOLCanvas {
     const width = Math.round(headingRect.width);
     const height = Math.round(headingRect.height);
 
-    let topY = -1;
-    let bottomY = -1;
-
-    // scan in rows
-    let prevLineEmpty = true;
-    hScan: for (let j = y; j < y + height; j++) {
-      let currHorizontalLine = [];
-      for (let i = x; i < x + width; i++) {
-        const lineLength = currHorizontalLine.length;
-        if (lineLength === width - 1) {
-          const isLineEmpty = currHorizontalLine.every(Boolean);
-          if (topY === -1 && !isLineEmpty) {
-            topY = j;
-          }
-          if (bottomY === -1 && !prevLineEmpty && isLineEmpty) {
-            bottomY = j;
-            break hScan;
-          }
-          currHorizontalLine = [];
-          prevLineEmpty = isLineEmpty;
-        }
-
-        currHorizontalLine.push(this.isPixelTransparent(i, j));
-      }
-    }
-
+    const { topY, bottomY } = this.horizontalScan(x, y, width, height);
     const { leftX, rightX } = this.verticalScan(x, y, width, height);
 
     // this.ctx.strokeStyle = "red";
@@ -162,6 +137,31 @@ class GOLCanvas {
     return { leftX, rightX };
   }
 
+  horizontalScan(x, y, width, height) {
+    let topY = -1;
+    let bottomY = -1;
+
+    let prevLineEmpty = true;
+    for (let j = y; j < y + height; j++) {
+      let currHorizontalLine = [];
+      for (let i = x; i < x + width; i++) {
+        currHorizontalLine.push(this.isPixelTransparent(i, j));
+      }
+
+      const isLineEmpty = currHorizontalLine.every(Boolean);
+      if (topY === -1 && !isLineEmpty) {
+        topY = j;
+      }
+      if (bottomY === -1 && !prevLineEmpty && isLineEmpty) {
+        bottomY = j;
+        break;
+      }
+      prevLineEmpty = isLineEmpty;
+    }
+
+    return { topY, bottomY };
+  }
+
   drawHeadingOnCanvas(heading) {
     const headingRect = heading.getBoundingClientRect();
     const x = Math.round(headingRect.left - this.rect.left);
@@ -173,7 +173,7 @@ class GOLCanvas {
     this.ctx.font = `${fontSize} "Micro 5"`;
     this.ctx.fillStyle = "rgb(201, 201, 201)";
     this.ctx.textBaseline = "top";
-    this.ctx.textAlign = "left";
+    this.ctx.textuAlign = "left";
 
     this.ctx.fillText(heading.innerText, x, y);
     this.invalidateImageDataCache(); // Invalidate cache after drawing
