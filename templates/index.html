@@ -2,6 +2,11 @@
 <html>
   <head>
     <title>Home</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/normalize.css/normalize.css"
+    />
     <link
       rel="stylesheet"
       href="https://unpkg.com/sakura.css/css/sakura.css"
@@ -10,84 +15,74 @@
     <link
       rel="stylesheet"
       href="https://unpkg.com/sakura.css/css/sakura-dark.css"
-      media="screen and (prefers-color-scheme: dark)"
+      media="(prefers-color-scheme: dark)"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Micro+5&display=swap"
+      rel="stylesheet"
     />
     <link rel="stylesheet" href="/static/style.css" media="screen" />
   </head>
   <body>
-    <h1 class="lead">Hi, I'm Artis</h1>
-    <p class="sublead">
-      I am a software engineer and I love building things.<br />
-      I work on backend, frontend, and DevOps.
-    </p>
-    <p class="sublead">Welcome to my website!</p>
-    <hr />
-    <h2>About me</h2>
-    <p>
-      I'm a generalist with over 20 years of experience in the software
-      industry. I have worked for companies of all sizes, from small startups to
-      large corporations.
-    </p>
-    <p>
-      My technology stack of choice is Python or JavaScript for the backend, and
-      React for the frontend. PostgreSQL is my preferred database. I have
-      experience with Django, Flask, Express, and DRF for backend development.
-      For frontend, I work with React, Preact, or vanilla JS. I prefer
-      TypeScript for all my JavaScript projects.
-    </p>
-    <p>
-      I am proficient in Linux and comfortable with the command line. My daily
-      OS is either macOS or Arch Linux. I prefer using Docker and Nix. I have
-      been hosting my own services on a $5 VPS for years.
-    </p>
-    <p>
-      Microcontrollers and embedded systems are my hobby. I once built an
-      installation for the Riga City Festival that used Arduino, a custom LED
-      driver, and a backend built with Flask and Redis to control the lights.
-      People could tweet their messages or enter them into a local terminal, and
-      the messages would be flashed using Morse code.
-    </p>
-    <p>
-      Lately, I have been learning Rust and OCaml. This website runs on a Rust
-      backend with my own implementation of Server Side Includes. The frontend
-      is vanilla JS with no frameworks. The CSS is Sakura.css with a few
-      customizations.
-    </p>
-    <p>
-      I speak English, Latvian, and Russian. In the past, I lived in the
-      Netherlands and can understand some Dutch.
-    </p>
-    <p>
-      I have worked as an individual contributor and have been an engineering
-      manager as well. I enjoy programming and building things more than
-      managing people.
-    </p>
-    <h3>Ready to collaborate?</h3>
-    <blockquote>
-      Got a cool idea? Need help with your project? Looking to launch an MVP?
-      I'm your guy. I'm available for contract work. Having spent two decades
-      tinkering with code, I know a thing or two about building software.
-      <br />
-      Interested? Drop me a line at
-      <a href="mailto:artis.avotins@gmail.com">artis.avotins@gmail.com</a>
-    </blockquote>
-    <p>
-      I am from Latvia, a small country in the Baltics. Latvia is part of the EU
-      and the Schengen zone.
-    </p>
-    <hr />
-    <h3>Socials</h3>
-    <ul>
-      <li>
-        <a href="https://x.com/artiscode">𝕏 <small>(Twitter)</small></a>
-      </li>
-      <li><a href="https://github.com/artis101">GitHub</a></li>
-      <li>
-        <a href="https://www.linkedin.com/in/artis-avotins-a97915192/"
-          >LinkedIn</a
-        >
-      </li>
-      <li><a href="mailto:artis.avotins@gmail.com">Email</a></li>
-    </ul>
+    <canvas id="canvas"></canvas>
+    <div id="container">
+      <h1 class="lead">
+        Hi, I'm <span id="gol-start" class="micro5">Artis</span>
+      </h1>
+      <p class="sublead">
+        Software engineer who loves to build.<br />
+        Backend, frontend and devops generalist.
+      </p>
+      <p class="sublead">Welcome to my website!</p>
+      <hr />
+      <h2 class="micro5">About me</h2>
+      <p>
+        I'm a generalist with over 20 years of experience in the software
+        industry. I have worked for companies of all sizes, from small startups
+        to large corporations, and have been a founder as well.
+      </p>
+      <p>
+        My technology stack of choice is Python or JavaScript for the backend,
+        and React for the frontend. PostgreSQL is my preferred database. I have
+        experience with Django, Flask, Express, Next.js, and DRF for backend
+        development. For frontend, I work with React, Preact, or vanilla JS. I
+        prefer TypeScript for all my JavaScript projects.
+      </p>
+      <p>
+        I am proficient in Linux and comfortable with the command line. My daily
+        OS is either MacOS or Arch Linux. I prefer using Docker and Nix. I have
+        been hosting my own services on a $5 VPS for years.
+      </p>
+      <p>
+        Throughout my career I have worked as a contractor, an individual
+        contributor and have been an engineering manager as well.
+      </p>
+      <p>
+        That's my professional life summed up in five paragraphs. Feel free to
+        look arouind the site to learn more about me.
+      </p>
+      <hr />
+      <h3 class="micro5">Work with me</h3>
+      <blockquote>
+        Got a cool idea? Need help with your project? Looking to launch an MVP?
+        I'm your guy. I'm available for contract work. Having spent two decades
+        tinkering with code, I know a thing or two about building software.
+        <br />
+        Interested? Drop me a line at
+        <a href="mailto:artis.avotins@gmail.com">artis.avotins@gmail.com</a>
+      </blockquote>
+      <hr />
+      <h3 class="micro5">Contacts</h3>
+      <ul>
+        <li>
+          <a href="https://x.com/artiscode">𝕏 <small>(Twitter)</small></a>
+        </li>
+        <li><a href="https://github.com/artis101">GitHub</a></li>
+        <li><a href="mailto:artis.avotins@gmail.com">Email</a></li>
+      </ul>
+    </div>
+    <script src="/static/script.js"></script>
   </body>
 </html>

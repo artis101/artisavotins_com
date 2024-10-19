@@ -9,7 +9,7 @@ mod ssi_processor;
 use ssi_processor::SSIProcessor;
 
 static TEMPLATE_CONTENT: OnceCell<Arc<String>> = OnceCell::const_new();
-const LISTEN_ADDR: &str = "127.0.0.1";
+const LISTEN_ADDR: &str = "0.0.0.0";
 const PORT: u16 = 1337;
 
 #[tokio::main]
@@ -117,4 +117,3 @@ async fn serve_static_file(path: &str) -> Result<String, Box<dyn Error + Send + 
     let full_path = format!(".{}", path);
     fs::read_to_string(full_path).await.map_err(|e| e.into())
 }
-
