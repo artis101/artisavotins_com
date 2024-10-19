@@ -51,7 +51,7 @@ class GOLCanvas {
   }
 
   setupGOLHeadings() {
-    document.querySelectorAll("#gol-start").forEach((heading) => {
+    document.querySelectorAll(".micro5").forEach((heading) => {
       const fontSize = window.getComputedStyle(heading).fontSize;
       const pixelSize = this.detectPixelSizeFromFontSize(fontSize);
       if (pixelSize === -1) {
@@ -79,10 +79,10 @@ class GOLCanvas {
 
   setupGOLHeading(pixelSize, heading) {
     this.drawHeadingOnCanvas(heading);
-    this.drawDebugBoxesOnHeading(heading);
+    this.drawDebugBoxesOnHeading(pixelSize, heading);
   }
 
-  drawDebugBoxesOnHeading(heading) {
+  drawDebugBoxesOnHeading(pixelSize, heading) {
     const headingRect = heading.getBoundingClientRect();
     const x = Math.round(headingRect.left - this.rect.left);
     const y = Math.round(headingRect.top - this.rect.top);
@@ -121,11 +121,11 @@ class GOLCanvas {
     // this.ctx.lineWidth = 1;
     // this.ctx.strokeRect(leftX, topY, rightX - leftX, bottomY - topY);
 
-    // draw a 7x7 pixel grid inside the box
+    // draw a pixel grid inside the box
     this.ctx.strokeStyle = "blue";
     this.ctx.lineWidth = 1;
-    for (let i = leftX; i < rightX; i += 7) {
-      for (let j = topY; j < bottomY; j += 7) {
+    for (let i = leftX; i < rightX; i += pixelSize) {
+      for (let j = topY; j < bottomY; j += pixelSize) {
         this.ctx.strokeRect(i, j, 7, 7);
       }
     }
@@ -195,23 +195,25 @@ class GOLCanvas {
     let squareTopY = -1;
     let squareBottomY = -1;
 
-    // scan in columns to find the top and bottom of the dot for letter "i"
-    for (let x = x_origin; x < x_origin + 100; x++) {
-      // Reduced range for efficiency
-      for (let y = y_origin; y < y_origin + 100; y++) {
-        if (!this.isPixelTransparent(x, y)) {
-          if (squareTopY === -1) {
-            squareTopY = y;
-          } else if (
-            squareBottomY === -1 &&
-            this.isPixelTransparent(x, y - 1)
-          ) {
-            squareBottomY = y;
-            break; // Exit y-loop once bottom is found
-          }
+    // scan in rows to find the top and bottom of the dot for letter "i"
+    for (let i = x_origin; i < this.canvas.width; i++) {
+      const horizontalLine = [];
+
+      for (let j = y_origin; j < this.canvas.height; j++) {
+        horizontalLine.push(this.isPixelTransparent(i, j));
+      }
+      const isLineEmpty = horizontalLine.every(Boolean);
+
+      if (squareTopY === -1) {
+        if (!isLineEmpty) {
+          squareTopY = i;
+        }
+      } else if (squareBottomY === -1) {
+        if (isLineEmpty) {
+          squareBottomY = i;
+          break;
         }
       }
-      if (squareBottomY !== -1) break; // Exit x-loop once bottom is found
     }
 
     if (squareTopY === -1 || squareBottomY === -1) {
@@ -220,7 +222,7 @@ class GOLCanvas {
 
     this.clearCanvas();
 
-    return squareBottomY - squareTopY;
+    return Math.floor(squareBottomY - squareTopY);
   }
 
   isPixelTransparent(x, y) {
