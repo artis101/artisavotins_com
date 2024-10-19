@@ -6,7 +6,7 @@ class GOLCanvas {
     this.ctx = this.canvas.getContext("2d");
     this.dpr = window.devicePixelRatio || 1;
     this.rect = this.canvas.getBoundingClientRect();
-    this.squareSizes = new Map();
+    this.headingPixelSizes = new Map();
     this.imageDataCache = null;
     this.isAnimating = false;
 
@@ -51,15 +51,15 @@ class GOLCanvas {
   }
 
   setupGOLHeadings() {
-    document.querySelectorAll(".micro5").forEach((heading) => {
+    document.querySelectorAll("#gol-start").forEach((heading) => {
       const fontSize = window.getComputedStyle(heading).fontSize;
       const pixelSize = this.detectPixelSizeFromFontSize(fontSize);
       if (pixelSize === -1) {
         console.error(`Failed to detect pixel size for font size: ${fontSize}`);
         return;
       }
-      this.squareSizes.set(heading, pixelSize);
-      console.log(`Pixel size: ${pixelSize} for font size: ${fontSize}`);
+      this.headingPixelSizes.set(heading, pixelSize);
+      console.log(`Pixel size: ${pixelSize} :: Font size: ${fontSize}`);
     });
 
     this.isAnimating = true;
@@ -70,7 +70,7 @@ class GOLCanvas {
     if (!this.isAnimating) return;
 
     this.clearCanvas();
-    this.squareSizes.forEach((size, heading) =>
+    this.headingPixelSizes.forEach((size, heading) =>
       this.setupGOLHeading(size, heading),
     );
 
@@ -79,10 +79,10 @@ class GOLCanvas {
 
   setupGOLHeading(pixelSize, heading) {
     this.drawHeadingOnCanvas(heading);
-    this.drawDebugBoxesOnHeading(pixelSize, heading);
+    this.calculateHeadingGrid(pixelSize, heading);
   }
 
-  drawDebugBoxesOnHeading(pixelSize, heading) {
+  calculateHeadingGrid(pixelSize, heading) {
     const headingRect = heading.getBoundingClientRect();
     const x = Math.round(headingRect.left - this.rect.left);
     const y = Math.round(headingRect.top - this.rect.top);
@@ -92,18 +92,40 @@ class GOLCanvas {
     const { topY, bottomY } = this.horizontalScan(x, y, width, height);
     const { leftX, rightX } = this.verticalScan(x, y, width, height);
 
-    // this.ctx.strokeStyle = "red";
-    // this.ctx.lineWidth = 1;
-    // this.ctx.strokeRect(leftX, topY, rightX - leftX, bottomY - topY);
-
     // draw a pixel grid inside the box
-    this.ctx.strokeStyle = "blue";
-    this.ctx.lineWidth = 1;
     for (let i = leftX; i < rightX; i += pixelSize) {
       for (let j = topY; j < bottomY; j += pixelSize) {
-        this.ctx.strokeRect(i, j, 7, 7);
+        const isCellFilled = this.isCellFilled(i, j, pixelSize);
+
+        if (isCellFilled) {
+          this.ctx.fillStyle = "rgb(255, 0, 0)";
+          this.ctx.fillRect(i, j, pixelSize, pixelSize);
+        }
       }
     }
+    heading.style.opacity = 0;
+  }
+
+  isCellFilled(x, y, pixelSize) {
+    // cell is filled if most of pixels are rgba 201, 201, 201, 255
+    let filledPixels = 0;
+    let totalPixels = 0;
+    for (let i = x; i < x + pixelSize; i++) {
+      for (let j = y; j < y + pixelSize; j++) {
+        const pixel = this.readRawPixel(i, j);
+        if (
+          pixel.r === 201 &&
+          pixel.g === 201 &&
+          pixel.b === 201 &&
+          pixel.a === 255
+        ) {
+          filledPixels++;
+        }
+        totalPixels++;
+      }
+    }
+
+    return filledPixels / totalPixels > 0.4;
   }
 
   verticalScan(x, y, width, height) {
