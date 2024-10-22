@@ -8,6 +8,7 @@ class GOLCanvas {
     this.rect = this.canvas.getBoundingClientRect();
     this.imageDataCache = null;
     this.isAnimating = false;
+    this.gridState = []; // Stores the state of the grid (1 for live, 0 for dead)
 
     this.initCanvas();
   }
@@ -27,11 +28,50 @@ class GOLCanvas {
     this.ctx.scale(this.dpr, this.dpr);
     this.ctx.imageSmoothingEnabled = false;
 
-    this.invalidateImageDataCache();
+    // Calculate and initialize the grid state
+    this.initializeGridState();
 
     if (!this.isAnimating) {
       this.isAnimating = true;
       this.animateCanvas();
+    }
+  }
+
+  initializeGridState() {
+    const targetEl = document.querySelector("#gol-start");
+    const targetRect = targetEl.getBoundingClientRect();
+    const targetHeight = targetRect.height;
+    const targetWidth = targetRect.width;
+
+    const gridHeight = 9; // Number of cells vertically
+    const cellSize = Math.floor((targetHeight / gridHeight) * this.dpr);
+    const gridWidth = Math.ceil((targetWidth * this.dpr) / cellSize) + 7; // Making grid wider to accommodate letters
+
+    this.gridState = Array.from({ length: gridHeight }, () =>
+      Array(gridWidth).fill(0),
+    );
+
+    // Add the letters to the grid state
+    this.addLettersToGridState();
+  }
+
+  addLettersToGridState() {
+    const word = "Artis";
+    let startX = 2; // Start from column 2 to leave empty columns at the left
+    let startY = 2; // Start from row 2 to leave empty rows at the top
+
+    for (let letter of word) {
+      if (LETTERS[letter]) {
+        const letterMatrix = LETTERS[letter];
+        for (let row = 0; row < letterMatrix.length; row++) {
+          for (let col = 0; col < letterMatrix[row].length; col++) {
+            if (letterMatrix[row][col] === 1) {
+              this.gridState[startY + row][startX + col] = 1; // Set live cells for letters
+            }
+          }
+        }
+        startX += LETTERS[letter][0].length + 1; // Move to the next letter position, with 1 column gap
+      }
     }
   }
 
@@ -70,103 +110,60 @@ class GOLCanvas {
   }
 
   tick() {
-    this.drawGrid();
-    this.drawLetters();
+    this.drawStoredGrid();
   }
 
-  drawGrid() {
+  drawStoredGrid() {
     const targetEl = document.querySelector("#gol-start");
     const targetRect = targetEl.getBoundingClientRect();
     const canvasRect = this.canvas.getBoundingClientRect();
 
     // Convert target coordinates to canvas coordinates
-    const canvasX = targetRect.left - canvasRect.left;
-    const canvasY = targetRect.top - canvasRect.top;
+    const canvasX = (targetRect.left - canvasRect.left) * this.dpr;
+    const canvasY = (targetRect.top - canvasRect.top) * this.dpr;
+    const targetHeight = targetRect.height;
     const targetWidth = targetRect.width;
-    const targetHeight = targetRect.height;
+
+    const gridHeight = this.gridState.length;
+    const cellSize = Math.floor((targetHeight / gridHeight) * this.dpr);
+    const gridWidth = this.gridState[0].length;
 
     // Get image data at the actual resolution
     const imageData = this.getCanvasImageData();
     const data = imageData.data;
 
-    const gridHeight = 9; // Number of cells vertically
-    const cellSize = Math.floor((targetHeight / gridHeight) * this.dpr);
+    for (let row = 0; row < gridHeight; row++) {
+      for (let col = 0; col < gridWidth; col++) {
+        const baseX = Math.floor(canvasX + col * cellSize);
+        const baseY = Math.floor(canvasY + row * cellSize);
 
-    // Draw the grid
-    for (let y = 0; y < targetHeight * this.dpr; ++y) {
-      for (let x = 0; x < targetWidth * this.dpr; ++x) {
-        const pixelX = Math.floor(canvasX * this.dpr + x);
-        const pixelY = Math.floor(canvasY * this.dpr + y);
-        const i = (pixelX + pixelY * this.canvas.width) * 4;
-        if (x % cellSize === 0 || y % cellSize === 0) {
-          data[i] = 0; // R
-          data[i + 1] = 255; // G
-          data[i + 2] = 0; // B
-          data[i + 3] = 128; // A
-        }
-      }
-    }
+        // Draw the grid cell
+        for (let y = 0; y < cellSize; y++) {
+          for (let x = 0; x < cellSize; x++) {
+            const pixelX = baseX + x;
+            const pixelY = baseY + y;
 
-    this.ctx.putImageData(imageData, 0, 0);
-    this.invalidateImageDataCache();
-  }
+            if (
+              pixelX >= 0 &&
+              pixelY >= 0 &&
+              pixelX < this.canvas.width &&
+              pixelY < this.canvas.height
+            ) {
+              const i = (pixelX + pixelY * this.canvas.width) * 4;
 
-  drawLetters() {
-    const targetEl = document.querySelector("#gol-start");
-    const targetRect = targetEl.getBoundingClientRect();
-    const canvasRect = this.canvas.getBoundingClientRect();
-
-    // Convert target coordinates to canvas coordinates
-    const canvasX = targetRect.left - canvasRect.left;
-    const canvasY = targetRect.top - canvasRect.top;
-    const targetHeight = targetRect.height;
-
-    const gridHeight = 9; // Number of cells vertically
-    const cellSize = Math.floor((targetHeight / gridHeight) * this.dpr);
-
-    // Coordinates for starting to draw the letters
-    let startX = canvasX * this.dpr + 1 * cellSize; // Leave one empty line at the top for better alignment
-    let startY = canvasY * this.dpr + 2 * cellSize;
-
-    // Loop through each letter in "Artis"
-    const word = "Artis";
-    for (let letter of word) {
-      if (LETTERS[letter]) {
-        this.drawLetter(LETTERS[letter], startX, startY, cellSize);
-        startX += LETTERS[letter][0].length * cellSize + cellSize; // Move to the next letter with minimal gap
-      }
-    }
-  }
-
-  drawLetter(letterMatrix, startX, startY, cellSize) {
-    // Get image data at the actual resolution
-    const imageData = this.getCanvasImageData();
-    const data = imageData.data;
-
-    for (let row = 0; row < letterMatrix.length; row++) {
-      for (let col = 0; col < letterMatrix[row].length; col++) {
-        if (letterMatrix[row][col] === 1) {
-          // Calculate the pixel position
-          const baseX = Math.floor(startX + col * cellSize);
-          const baseY = Math.floor(startY + row * cellSize);
-
-          // Fill in the grid cell with white color
-          for (let y = 0; y < cellSize; y++) {
-            for (let x = 0; x < cellSize; x++) {
-              const pixelX = baseX + x;
-              const pixelY = baseY + y;
-
-              if (
-                pixelX >= 0 &&
-                pixelY >= 0 &&
-                pixelX < this.canvas.width &&
-                pixelY < this.canvas.height
-              ) {
-                const i = (pixelX + pixelY * this.canvas.width) * 4;
-                data[i] = 255; // R
-                data[i + 1] = 255; // G
-                data[i + 2] = 255; // B
+              // Set cell color based on state: Green for grid lines, White for live cells, and Transparent for dead cells
+              if (this.gridState[row][col] === 1) {
+                data[i] = 201; // R
+                data[i + 1] = 201; // G
+                data[i + 2] = 201; // B
                 data[i + 3] = 255; // A
+              } else if (x % cellSize === 0 || y % cellSize === 0) {
+                data[i] = 0; // R
+                data[i + 1] = 255; // G
+                data[i + 2] = 0; // B
+                data[i + 3] = 128; // A (Semi-transparent green for grid lines)
+              } else {
+                data[i + 3] = 0; // Make the cell transparent
               }
             }
           }
@@ -174,7 +171,6 @@ class GOLCanvas {
       }
     }
 
-    // Update the canvas with the modified image data
     this.ctx.putImageData(imageData, 0, 0);
     this.invalidateImageDataCache();
   }
