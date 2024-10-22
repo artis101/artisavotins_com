@@ -41,11 +41,21 @@ class GOLCanvas {
     const targetEl = document.querySelector("#gol-start");
     const targetRect = targetEl.getBoundingClientRect();
     const targetHeight = targetRect.height;
-    const targetWidth = targetRect.width;
 
     const gridHeight = 9; // Number of cells vertically
     const cellSize = Math.floor((targetHeight / gridHeight) * this.dpr);
-    const gridWidth = Math.ceil((targetWidth * this.dpr) / cellSize) + 7; // Making grid wider to accommodate letters
+
+    // Calculate grid width based on the word "Artis"
+    let totalWidthCells = 0;
+    const word = "Artis";
+    for (let letter of word) {
+      if (LETTERS[letter]) {
+        totalWidthCells += LETTERS[letter][0].length + 1; // Letter width + 1 cell for space between letters
+      }
+    }
+    totalWidthCells--; // Remove extra space after the last letter
+
+    const gridWidth = totalWidthCells; // Number of cells horizontally
 
     this.gridState = Array.from({ length: gridHeight }, () =>
       Array(gridWidth).fill(0),
@@ -57,7 +67,7 @@ class GOLCanvas {
 
   addLettersToGridState() {
     const word = "Artis";
-    let startX = 2; // Start from column 2 to leave empty columns at the left
+    let startX = 0; // Start from column 0 to align letters to the very left side
     let startY = 2; // Start from row 2 to leave empty rows at the top
 
     for (let letter of word) {
@@ -122,7 +132,6 @@ class GOLCanvas {
     const canvasX = (targetRect.left - canvasRect.left) * this.dpr;
     const canvasY = (targetRect.top - canvasRect.top) * this.dpr;
     const targetHeight = targetRect.height;
-    const targetWidth = targetRect.width;
 
     const gridHeight = this.gridState.length;
     const cellSize = Math.floor((targetHeight / gridHeight) * this.dpr);
