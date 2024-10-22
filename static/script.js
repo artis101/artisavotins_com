@@ -6,7 +6,6 @@ class GOLCanvas {
     this.ctx = this.canvas.getContext("2d");
     this.dpr = window.devicePixelRatio || 1;
     this.rect = this.canvas.getBoundingClientRect();
-    this.headingPixelSizes = new Map();
     this.imageDataCache = null;
     this.isAnimating = false;
 
@@ -14,14 +13,26 @@ class GOLCanvas {
   }
 
   initCanvas() {
-    this.rect = this.canvas.getBoundingClientRect(); // Update rect on init
+    this.rect = this.canvas.getBoundingClientRect();
+
+    // Set the canvas size in pixels
     this.canvas.width = this.rect.width * this.dpr;
     this.canvas.height = this.rect.height * this.dpr;
-    this.ctx.scale(this.dpr, this.dpr);
-    this.ctx.imageSmoothingEnabled = false;
+
+    // Set the display size
     this.canvas.style.width = `${this.rect.width}px`;
     this.canvas.style.height = `${this.rect.height}px`;
-    this.invalidateImageDataCache(); // Invalidate cache on resize
+
+    // Scale the context to handle DPR
+    this.ctx.scale(this.dpr, this.dpr);
+    this.ctx.imageSmoothingEnabled = false;
+
+    this.invalidateImageDataCache();
+
+    if (!this.isAnimating) {
+      this.isAnimating = true;
+      this.animateCanvas();
+    }
   }
 
   getCanvasImageData() {
@@ -29,8 +40,8 @@ class GOLCanvas {
       this.imageDataCache = this.ctx.getImageData(
         0,
         0,
-        this.canvas.width / this.dpr,
-        this.canvas.height / this.dpr,
+        this.canvas.width,
+        this.canvas.height,
       );
     }
     return this.imageDataCache;
@@ -41,250 +52,174 @@ class GOLCanvas {
   }
 
   clearCanvas() {
-    this.ctx.clearRect(
-      0,
-      0,
-      this.canvas.width / this.dpr,
-      this.canvas.height / this.dpr,
-    );
+    this.ctx.clearRect(0, 0, this.rect.width, this.rect.height);
     this.invalidateImageDataCache();
-  }
-
-  setupGOLHeadings() {
-    document.querySelectorAll("#gol-start").forEach((heading) => {
-      const fontSize = window.getComputedStyle(heading).fontSize;
-      const pixelSize = this.detectPixelSizeFromFontSize(fontSize);
-      if (pixelSize === -1) {
-        console.error(`Failed to detect pixel size for font size: ${fontSize}`);
-        return;
-      }
-      this.headingPixelSizes.set(heading, pixelSize);
-      console.log(`Pixel size: ${pixelSize} :: Font size: ${fontSize}`);
-    });
-
-    this.isAnimating = true;
-    this.animateCanvas();
   }
 
   animateCanvas() {
     if (!this.isAnimating) return;
 
     this.clearCanvas();
-    this.headingPixelSizes.forEach((size, heading) =>
-      this.setupGOLHeading(size, heading),
-    );
+    this.tick();
 
     requestAnimationFrame(() => this.animateCanvas());
-  }
-
-  setupGOLHeading(pixelSize, heading) {
-    this.drawHeadingOnCanvas(heading);
-    this.calculateHeadingGrid(pixelSize, heading);
-  }
-
-  calculateHeadingGrid(pixelSize, heading) {
-    const headingRect = heading.getBoundingClientRect();
-    const x = Math.round(headingRect.left - this.rect.left);
-    const y = Math.round(headingRect.top - this.rect.top);
-    const width = Math.round(headingRect.width);
-    const height = Math.round(headingRect.height);
-
-    const { topY, bottomY } = this.horizontalScan(x, y, width, height);
-    const { leftX, rightX } = this.verticalScan(x, y, width, height);
-
-    // draw a pixel grid inside the box
-    for (let i = leftX; i < rightX; i += pixelSize) {
-      for (let j = topY; j < bottomY; j += pixelSize) {
-        const isCellFilled = this.isCellFilled(i, j, pixelSize);
-
-        if (isCellFilled) {
-          this.ctx.fillStyle = "rgb(255, 0, 0)";
-          this.ctx.fillRect(i, j, pixelSize, pixelSize);
-        }
-      }
-    }
-    heading.style.opacity = 0;
-  }
-
-  isCellFilled(x, y, pixelSize) {
-    // cell is filled if most of pixels are rgba 201, 201, 201, 255
-    let filledPixels = 0;
-    let totalPixels = 0;
-    for (let i = x; i < x + pixelSize; i++) {
-      for (let j = y; j < y + pixelSize; j++) {
-        const pixel = this.readRawPixel(i, j);
-        if (
-          pixel.r === 201 &&
-          pixel.g === 201 &&
-          pixel.b === 201 &&
-          pixel.a === 255
-        ) {
-          filledPixels++;
-        }
-        totalPixels++;
-      }
-    }
-
-    return filledPixels / totalPixels > 0.4;
-  }
-
-  verticalScan(x, y, width, height) {
-    let leftX = -1;
-    let rightX = -1;
-
-    for (let i = 0; i < width; i++) {
-      let leftVerticalLine = [];
-      let rightVerticalLine = [];
-
-      for (let j = y; j < y + height; j++) {
-        leftVerticalLine.push(this.isPixelTransparent(x + i, j));
-        rightVerticalLine.push(this.isPixelTransparent(x + width - 1 - i, j));
-      }
-
-      const isLeftLineEmpty = leftVerticalLine.every(Boolean);
-      const isRightLineEmpty = rightVerticalLine.every(Boolean);
-
-      if (leftX === -1 && !isLeftLineEmpty) {
-        leftX = x + i;
-      }
-      if (rightX === -1 && !isRightLineEmpty) {
-        rightX = x + width - i;
-      }
-
-      if (leftX !== -1 && rightX !== -1) {
-        break;
-      }
-    }
-
-    return { leftX, rightX };
-  }
-
-  horizontalScan(x, y, width, height) {
-    let topY = -1;
-    let bottomY = -1;
-
-    let prevLineEmpty = true;
-    for (let j = y; j < y + height; j++) {
-      let currHorizontalLine = [];
-      for (let i = x; i < x + width; i++) {
-        currHorizontalLine.push(this.isPixelTransparent(i, j));
-      }
-
-      const isLineEmpty = currHorizontalLine.every(Boolean);
-      if (topY === -1 && !isLineEmpty) {
-        topY = j;
-      }
-      if (bottomY === -1 && !prevLineEmpty && isLineEmpty) {
-        bottomY = j;
-        break;
-      }
-      prevLineEmpty = isLineEmpty;
-    }
-
-    return { topY, bottomY };
-  }
-
-  drawHeadingOnCanvas(heading) {
-    const headingRect = heading.getBoundingClientRect();
-    const x = Math.round(headingRect.left - this.rect.left);
-    const y = Math.round(headingRect.top - this.rect.top);
-
-    // first draw the text on the canvas
-    // over where it's positioned in HTML
-    const fontSize = window.getComputedStyle(heading).fontSize;
-    this.ctx.font = `${fontSize} "Micro 5"`;
-    this.ctx.fillStyle = "rgb(201, 201, 201)";
-    this.ctx.textBaseline = "top";
-    this.ctx.textuAlign = "left";
-
-    this.ctx.fillText(heading.innerText, x, y);
-    this.invalidateImageDataCache(); // Invalidate cache after drawing
-  }
-
-  detectPixelSizeFromFontSize(fontSize) {
-    const x_origin = 10;
-    const y_origin = 10;
-    // Clear the canvas before drawing.
-    this.clearCanvas();
-
-    // Draw the letter "i" with the provided font size.
-    this.ctx.font = `${fontSize} "Micro 5"`;
-    this.ctx.fillStyle = "#fff";
-    this.ctx.textBaseline = "top";
-    this.ctx.textAlign = "left";
-    this.ctx.fillText("i", x_origin, y_origin);
-
-    let squareTopY = -1;
-    let squareBottomY = -1;
-
-    // scan in rows to find the top and bottom of the dot for letter "i"
-    for (let i = x_origin; i < this.canvas.width; i++) {
-      const horizontalLine = [];
-
-      for (let j = y_origin; j < this.canvas.height; j++) {
-        horizontalLine.push(this.isPixelTransparent(i, j));
-      }
-      const isLineEmpty = horizontalLine.every(Boolean);
-
-      if (squareTopY === -1) {
-        if (!isLineEmpty) {
-          squareTopY = i;
-        }
-      } else if (squareBottomY === -1) {
-        if (isLineEmpty) {
-          squareBottomY = i;
-          break;
-        }
-      }
-    }
-
-    if (squareTopY === -1 || squareBottomY === -1) {
-      return -1;
-    }
-
-    this.clearCanvas();
-
-    return Math.floor(squareBottomY - squareTopY);
-  }
-
-  isPixelTransparent(x, y) {
-    return this.readRawPixel(x, y).a === 0;
-  }
-
-  readRawPixel(x, y) {
-    const scaledX = Math.round(x * this.dpr);
-    const scaledY = Math.round(y * this.dpr);
-    const imageData = this.getCanvasImageData();
-    const pixelIndex = (scaledY * this.canvas.width + scaledX) * 4;
-    if (
-      scaledY < 0 ||
-      scaledY >= imageData.height ||
-      scaledX < 0 ||
-      scaledX >= imageData.width
-    ) {
-      return { r: 0, g: 0, b: 0, a: 0 };
-    }
-    const r = imageData.data[pixelIndex];
-    const g = imageData.data[pixelIndex + 1];
-    const b = imageData.data[pixelIndex + 2];
-    const a = imageData.data[pixelIndex + 3];
-    return { r, g, b, a };
   }
 
   stopAnimation() {
     this.isAnimating = false;
   }
+
+  tick() {
+    this.drawGrid();
+    this.drawLetters();
+  }
+
+  drawGrid() {
+    const targetEl = document.querySelector("#gol-start");
+    const targetRect = targetEl.getBoundingClientRect();
+    const canvasRect = this.canvas.getBoundingClientRect();
+
+    // Convert target coordinates to canvas coordinates
+    const canvasX = targetRect.left - canvasRect.left;
+    const canvasY = targetRect.top - canvasRect.top;
+    const targetWidth = targetRect.width;
+    const targetHeight = targetRect.height;
+
+    // Get image data at the actual resolution
+    const imageData = this.getCanvasImageData();
+    const data = imageData.data;
+
+    const gridHeight = 9; // Number of cells vertically
+    const cellSize = Math.floor((targetHeight / gridHeight) * this.dpr);
+
+    // Draw the grid
+    for (let y = 0; y < targetHeight * this.dpr; ++y) {
+      for (let x = 0; x < targetWidth * this.dpr; ++x) {
+        const pixelX = Math.floor(canvasX * this.dpr + x);
+        const pixelY = Math.floor(canvasY * this.dpr + y);
+        const i = (pixelX + pixelY * this.canvas.width) * 4;
+        if (x % cellSize === 0 || y % cellSize === 0) {
+          data[i] = 0; // R
+          data[i + 1] = 255; // G
+          data[i + 2] = 0; // B
+          data[i + 3] = 128; // A
+        }
+      }
+    }
+
+    this.ctx.putImageData(imageData, 0, 0);
+    this.invalidateImageDataCache();
+  }
+
+  drawLetters() {
+    const targetEl = document.querySelector("#gol-start");
+    const targetRect = targetEl.getBoundingClientRect();
+    const canvasRect = this.canvas.getBoundingClientRect();
+
+    // Convert target coordinates to canvas coordinates
+    const canvasX = targetRect.left - canvasRect.left;
+    const canvasY = targetRect.top - canvasRect.top;
+    const targetHeight = targetRect.height;
+
+    const gridHeight = 9; // Number of cells vertically
+    const cellSize = Math.floor((targetHeight / gridHeight) * this.dpr);
+
+    // Coordinates for starting to draw the letters
+    let startX = canvasX * this.dpr + 1 * cellSize; // Leave one empty line at the top for better alignment
+    let startY = canvasY * this.dpr + 2 * cellSize;
+
+    // Loop through each letter in "Artis"
+    const word = "Artis";
+    for (let letter of word) {
+      if (LETTERS[letter]) {
+        this.drawLetter(LETTERS[letter], startX, startY, cellSize);
+        startX += LETTERS[letter][0].length * cellSize + cellSize; // Move to the next letter with minimal gap
+      }
+    }
+  }
+
+  drawLetter(letterMatrix, startX, startY, cellSize) {
+    // Get image data at the actual resolution
+    const imageData = this.getCanvasImageData();
+    const data = imageData.data;
+
+    for (let row = 0; row < letterMatrix.length; row++) {
+      for (let col = 0; col < letterMatrix[row].length; col++) {
+        if (letterMatrix[row][col] === 1) {
+          // Calculate the pixel position
+          const baseX = Math.floor(startX + col * cellSize);
+          const baseY = Math.floor(startY + row * cellSize);
+
+          // Fill in the grid cell with white color
+          for (let y = 0; y < cellSize; y++) {
+            for (let x = 0; x < cellSize; x++) {
+              const pixelX = baseX + x;
+              const pixelY = baseY + y;
+
+              if (
+                pixelX >= 0 &&
+                pixelY >= 0 &&
+                pixelX < this.canvas.width &&
+                pixelY < this.canvas.height
+              ) {
+                const i = (pixelX + pixelY * this.canvas.width) * 4;
+                data[i] = 255; // R
+                data[i + 1] = 255; // G
+                data[i + 2] = 255; // B
+                data[i + 3] = 255; // A
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Update the canvas with the modified image data
+    this.ctx.putImageData(imageData, 0, 0);
+    this.invalidateImageDataCache();
+  }
 }
+
+const LETTERS = {
+  A: [
+    [0, 1, 0],
+    [1, 0, 1],
+    [1, 1, 1],
+    [1, 0, 1],
+    [1, 0, 1],
+  ],
+  r: [
+    [0, 0],
+    [1, 1],
+    [1, 0],
+    [1, 0],
+    [1, 0],
+  ],
+  t: [
+    [1, 0],
+    [1, 1],
+    [1, 0],
+    [1, 0],
+    [1, 0],
+  ],
+  i: [[1], [0], [1], [1], [1]],
+  s: [
+    [0, 0, 0],
+    [1, 1, 1],
+    [1, 0, 0],
+    [0, 0, 1],
+    [1, 1, 1],
+  ],
+};
 
 let golCanvas;
 
 // Wait for all fonts to load before executing the main function
 document.fonts.ready.then(() => {
   golCanvas = new GOLCanvas();
-  golCanvas.setupGOLHeadings();
 });
 
-// handle resize events on the window
+// Handle resize events on the window
 window.addEventListener("resize", () => {
   if (golCanvas) {
     golCanvas.initCanvas();
