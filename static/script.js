@@ -2,10 +2,23 @@
 
 import { LETTERS } from "./letters.js";
 
+/**
+ * @typedef {Object} Offset
+ * @property {number} x - The x coordinate offset
+ * @property {number} y - The y coordinate offset
+ */
+
+/**
+ * @typedef {Object.<string, Offset>} OriginOffsets
+ */
+
 class GOLCanvas {
+  /**
+   * @constructor
+   */
   constructor() {
     this.canvas = document.querySelector("#canvas");
-    this.ctx = this.canvas.getContext("2d");
+    this.ctx = this.canvas.getContext("2d", { willReadFrequently: true });
     this.dpr = window.devicePixelRatio || 1;
     this.rect = this.canvas.getBoundingClientRect();
     this.imageDataCache = null;
@@ -13,6 +26,7 @@ class GOLCanvas {
     this.gridState = {}; // Stores the state of the grid (1 for live, 0 for dead)
     this.intervalId = null; // For GOL animation interval
     this.cellSize = null; // Fixed cell size for the simulation
+    /** @type {OriginOffsets} */
     this.originOffsets = {}; // Offset for grid expansion
 
     this.initState();
@@ -147,8 +161,8 @@ class GOLCanvas {
   startGOLSimulation() {
     this.intervalId = setInterval(() => {
       // this.markOffScreenCellsAsDead();
-      this.computeNextState();
       this.expandGridIfNecessary();
+      this.computeNextState();
     }, 100);
   }
 
