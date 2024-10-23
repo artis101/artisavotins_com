@@ -116,7 +116,7 @@ class GOLCanvas {
     // Set an interval to update the grid state every 500 milliseconds
     this.intervalId = setInterval(() => {
       this.expandGridIfNecessary();
-      this.markOffScreenCellsAsDead();
+      // this.markOffScreenCellsAsDead();
       this.computeNextState();
     }, 100);
   }
@@ -164,27 +164,8 @@ class GOLCanvas {
   }
 
   markOffScreenCellsAsDead() {
-    // Calculate visible bounds based on canvas size and cell size
-    const visibleWidthCells = Math.ceil(this.canvas.width / this.cellSize);
-    const visibleHeightCells = Math.ceil(this.canvas.height / this.cellSize);
-
-    // Mark cells outside of the visible area as dead
-    for (let row = 0; row < this.gridState.length; row++) {
-      for (let col = 0; col < this.gridState[row].length; col++) {
-        const pixelX = (col - this.originOffset.x) * this.cellSize;
-        const pixelY = (row - this.originOffset.y) * this.cellSize;
-
-        if (
-          pixelX < 0 ||
-          pixelY < 0 ||
-          pixelX >= this.canvas.width ||
-          pixelY >= this.canvas.height
-        ) {
-          this.gridState[row][col] = 0;
-        }
-      }
-    }
-
+    // @TODO: Implement this function to mark off
+    // cells that are off the screen as dead
     // Invalidate cache
     this.invalidateImageDataCache();
   }
@@ -283,7 +264,7 @@ class GOLCanvas {
     this.drawStoredGrid();
   }
 
-  drawStoredGrid() {
+  drawStoredGrid(drawCoordinateGrid = false) {
     const targetEl = document.querySelector("#gol-start");
     const targetRect = targetEl.getBoundingClientRect();
     const canvasRect = this.canvas.getBoundingClientRect();
@@ -328,7 +309,10 @@ class GOLCanvas {
                 data[i + 1] = 201; // G
                 data[i + 2] = 201; // B
                 data[i + 3] = 255; // A
-              } else if (x % this.cellSize === 0 || y % this.cellSize === 0) {
+              } else if (
+                drawCoordinateGrid &&
+                (x % this.cellSize === 0 || y % this.cellSize === 0)
+              ) {
                 data[i] = 0; // R
                 data[i + 1] = 255; // G
                 data[i + 2] = 0; // B
@@ -367,7 +351,7 @@ const LETTERS = {
     [1, 1],
     [1, 0],
     [1, 0],
-    [1, 0],
+    [1, 1],
   ],
   i: [[1], [0], [1], [1], [1]],
   s: [
