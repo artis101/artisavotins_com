@@ -76,7 +76,7 @@ class GOLCanvas {
     const targetRect = targetEl.getBoundingClientRect();
     const targetHeight = targetRect.height;
 
-    const gridHeight = 9; // Target number of vertical cells
+    const gridHeight = 11; // Target number of vertical cells
     this.cellSize = Math.max(
       1,
       Math.floor((targetHeight / gridHeight) * this.dpr),
@@ -111,7 +111,7 @@ class GOLCanvas {
 
   addLettersToGridState(word, gridState) {
     let startX = 0; // Start from column 0 to align letters to the very left side
-    let startY = 2; // Start from row 2 to leave empty rows at the top
+    let startY = 3; // Start from row 3 to leave empty rows at the top
 
     for (let letter of word) {
       if (LETTERS[letter]) {
