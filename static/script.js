@@ -11,6 +11,7 @@ class GOLCanvas {
     this.gridState = []; // Stores the state of the grid (1 for live, 0 for dead)
     this.intervalId = null; // For GOL animation interval
     this.cellSize = null; // Fixed cell size for the simulation
+    this.originOffset = { x: 0, y: 0 }; // Offset for grid expansion
 
     this.initCanvas();
     this.addEventListeners();
@@ -59,17 +60,20 @@ class GOLCanvas {
     const targetHeight = targetRect.height;
 
     const gridHeight = 9; // Number of cells vertically
-    this.cellSize = Math.floor((targetHeight / gridHeight) * this.dpr); // Fixed cell size
+    this.cellSize = Math.max(
+      1,
+      Math.floor((targetHeight / gridHeight) * this.dpr),
+    ); // Fixed cell size, ensure it's at least 1
 
-    // Calculate grid width based on the word "Artis"
+    // Calculate grid width based on the word from targetEl
+    const word = targetEl.innerText.trim();
     let totalWidthCells = 0;
-    const word = "Artis";
     for (let letter of word) {
       if (LETTERS[letter]) {
         totalWidthCells += LETTERS[letter][0].length + 1; // Letter width + 1 cell for space between letters
       }
     }
-    totalWidthCells--; // Remove extra space after the last letter
+    totalWidthCells = Math.max(1, totalWidthCells - 1); // Remove extra space after the last letter, ensure width is at least 1
 
     const gridWidth = totalWidthCells; // Number of cells horizontally
 
@@ -78,11 +82,13 @@ class GOLCanvas {
     );
 
     // Add the letters to the grid state
-    this.addLettersToGridState();
+    this.addLettersToGridState(word);
+
+    // Finally hide the original element
+    targetEl.style.visibility = "hidden";
   }
 
-  addLettersToGridState() {
-    const word = "Artis";
+  addLettersToGridState(word) {
     let startX = 0; // Start from column 0 to align letters to the very left side
     let startY = 2; // Start from row 2 to leave empty rows at the top
 
@@ -92,7 +98,12 @@ class GOLCanvas {
         for (let row = 0; row < letterMatrix.length; row++) {
           for (let col = 0; col < letterMatrix[row].length; col++) {
             if (letterMatrix[row][col] === 1) {
-              this.gridState[startY + row][startX + col] = 1; // Set live cells for letters
+              if (
+                startY + row < this.gridState.length &&
+                startX + col < this.gridState[0].length
+              ) {
+                this.gridState[startY + row][startX + col] = 1; // Set live cells for letters
+              }
             }
           }
         }
@@ -131,6 +142,7 @@ class GOLCanvas {
 
     if (expandTop) {
       this.gridState.unshift(Array(this.gridState[0].length).fill(0));
+      this.originOffset.y += 1;
     }
     if (expandBottom) {
       this.gridState.push(Array(this.gridState[0].length).fill(0));
@@ -139,6 +151,7 @@ class GOLCanvas {
       for (let row = 0; row < this.gridState.length; row++) {
         this.gridState[row].unshift(0);
       }
+      this.originOffset.x += 1;
     }
     if (expandRight) {
       for (let row = 0; row < this.gridState.length; row++) {
@@ -158,7 +171,15 @@ class GOLCanvas {
     // Mark cells outside of the visible area as dead
     for (let row = 0; row < this.gridState.length; row++) {
       for (let col = 0; col < this.gridState[row].length; col++) {
-        if (row >= visibleHeightCells || col >= visibleWidthCells) {
+        const pixelX = (col - this.originOffset.x) * this.cellSize;
+        const pixelY = (row - this.originOffset.y) * this.cellSize;
+
+        if (
+          pixelX < 0 ||
+          pixelY < 0 ||
+          pixelX >= this.canvas.width ||
+          pixelY >= this.canvas.height
+        ) {
           this.gridState[row][col] = 0;
         }
       }
@@ -280,8 +301,12 @@ class GOLCanvas {
 
     for (let row = 0; row < gridHeight; row++) {
       for (let col = 0; col < gridWidth; col++) {
-        const baseX = Math.floor(canvasX + col * this.cellSize);
-        const baseY = Math.floor(canvasY + row * this.cellSize);
+        const baseX = Math.floor(
+          canvasX + (col - this.originOffset.x) * this.cellSize,
+        );
+        const baseY = Math.floor(
+          canvasY + (row - this.originOffset.y) * this.cellSize,
+        );
 
         // Draw the grid cell
         for (let y = 0; y < this.cellSize; y++) {
