@@ -1,5 +1,7 @@
 "use strict";
 
+import { LETTERS } from "./letters.js";
+
 class GOLCanvas {
   constructor() {
     this.canvas = document.querySelector("#canvas");
@@ -8,10 +10,10 @@ class GOLCanvas {
     this.rect = this.canvas.getBoundingClientRect();
     this.imageDataCache = null;
     this.isAnimating = false;
-    this.gridState = []; // Stores the state of the grid (1 for live, 0 for dead)
+    this.gridState = {}; // Stores the state of the grid (1 for live, 0 for dead)
     this.intervalId = null; // For GOL animation interval
     this.cellSize = null; // Fixed cell size for the simulation
-    this.originOffset = { x: 0, y: 0 }; // Offset for grid expansion
+    this.originOffsets = {}; // Offset for grid expansion
 
     this.initCanvas();
     this.addEventListeners();
@@ -41,6 +43,14 @@ class GOLCanvas {
     }
   }
 
+  getGridOffsetForGridId(gridId) {
+    if (!this.originOffsets[gridId]) {
+      this.originOffsets[gridId] = { x: 0, y: 0 };
+    }
+
+    return this.originOffsets[gridId];
+  }
+
   addEventListeners() {
     document.body.addEventListener("click", () => {
       if (this.intervalId) {
@@ -55,11 +65,18 @@ class GOLCanvas {
   }
 
   initializeGridState() {
-    const targetEl = document.querySelector("#gol-start");
+    const golHeaders = document.querySelectorAll(".gol-header");
+
+    for (let header of golHeaders) {
+      this.initializeGridStateForElement(header);
+    }
+  }
+
+  initializeGridStateForElement(targetEl) {
     const targetRect = targetEl.getBoundingClientRect();
     const targetHeight = targetRect.height;
 
-    const gridHeight = 9; // Number of cells vertically
+    const gridHeight = 9; // Target number of vertical cells
     this.cellSize = Math.max(
       1,
       Math.floor((targetHeight / gridHeight) * this.dpr),
@@ -71,24 +88,28 @@ class GOLCanvas {
     for (let letter of word) {
       if (LETTERS[letter]) {
         totalWidthCells += LETTERS[letter][0].length + 1; // Letter width + 1 cell for space between letters
+      } else {
+        totalWidthCells += 4; // Add 3+1 cell for unknown characters
       }
     }
     totalWidthCells = Math.max(1, totalWidthCells - 1); // Remove extra space after the last letter, ensure width is at least 1
 
     const gridWidth = totalWidthCells; // Number of cells horizontally
 
-    this.gridState = Array.from({ length: gridHeight }, () =>
+    const gridState = Array.from({ length: gridHeight }, () =>
       Array(gridWidth).fill(0),
     );
 
+    this.gridState[targetEl.id] = gridState;
+    console.log(`Initialized grid state ${word} for ${targetEl.id}`);
     // Add the letters to the grid state
-    this.addLettersToGridState(word);
+    this.addLettersToGridState(word, gridState);
 
     // Finally hide the original element
     targetEl.style.visibility = "hidden";
   }
 
-  addLettersToGridState(word) {
+  addLettersToGridState(word, gridState) {
     let startX = 0; // Start from column 0 to align letters to the very left side
     let startY = 2; // Start from row 2 to leave empty rows at the top
 
@@ -99,15 +120,17 @@ class GOLCanvas {
           for (let col = 0; col < letterMatrix[row].length; col++) {
             if (letterMatrix[row][col] === 1) {
               if (
-                startY + row < this.gridState.length &&
-                startX + col < this.gridState[0].length
+                startY + row < gridState.length &&
+                startX + col < gridState[0].length
               ) {
-                this.gridState[startY + row][startX + col] = 1; // Set live cells for letters
+                gridState[startY + row][startX + col] = 1; // Set live cells for letters
               }
             }
           }
         }
         startX += LETTERS[letter][0].length + 1; // Move to the next letter position, with 1 column gap
+      } else {
+        startX += 4; // Move 3+1 columns for unknown characters
       }
     }
   }
@@ -122,42 +145,50 @@ class GOLCanvas {
   }
 
   expandGridIfNecessary() {
+    for (let gridId in this.gridState) {
+      this.expandGridForElement(gridId);
+    }
+  }
+
+  expandGridForElement(gridId) {
     // Check if any live cells are on the edge, and expand the grid accordingly
     let expandTop = false,
       expandBottom = false,
       expandLeft = false,
       expandRight = false;
+    let gridState = this.gridState[gridId];
+    let originOffset = this.getGridOffsetForGridId(gridId);
 
-    for (let row = 0; row < this.gridState.length; row++) {
-      if (this.gridState[row][0] === 1) expandLeft = true;
-      if (this.gridState[row][this.gridState[row].length - 1] === 1)
-        expandRight = true;
+    for (let row = 0; row < gridState.length; row++) {
+      if (gridState[row][0] === 1) expandLeft = true;
+      if (gridState[row][gridState[row].length - 1] === 1) expandRight = true;
     }
 
-    for (let col = 0; col < this.gridState[0].length; col++) {
-      if (this.gridState[0][col] === 1) expandTop = true;
-      if (this.gridState[this.gridState.length - 1][col] === 1)
-        expandBottom = true;
+    for (let col = 0; col < gridState[0].length; col++) {
+      if (gridState[0][col] === 1) expandTop = true;
+      if (gridState[gridState.length - 1][col] === 1) expandBottom = true;
     }
 
     if (expandTop) {
-      this.gridState.unshift(Array(this.gridState[0].length).fill(0));
-      this.originOffset.y += 1;
+      gridState.unshift(Array(gridState[0].length).fill(0));
+      originOffset.y += 1;
     }
     if (expandBottom) {
-      this.gridState.push(Array(this.gridState[0].length).fill(0));
+      gridState.push(Array(gridState[0].length).fill(0));
     }
     if (expandLeft) {
-      for (let row = 0; row < this.gridState.length; row++) {
-        this.gridState[row].unshift(0);
+      for (let row = 0; row < gridState.length; row++) {
+        gridState[row].unshift(0);
       }
-      this.originOffset.x += 1;
+      originOffset.x += 1;
     }
     if (expandRight) {
-      for (let row = 0; row < this.gridState.length; row++) {
-        this.gridState[row].push(0);
+      for (let row = 0; row < gridState.length; row++) {
+        gridState[row].push(0);
       }
     }
+
+    this.originOffsets[gridId] = { ...originOffset };
 
     // Invalidate cache
     this.invalidateImageDataCache();
@@ -171,13 +202,21 @@ class GOLCanvas {
   }
 
   computeNextState() {
-    const nextState = this.gridState.map((row) => [...row]);
+    for (let gridId in this.gridState) {
+      this.computeNextStateForElement(gridId);
+    }
+    this.invalidateImageDataCache();
+  }
 
-    for (let row = 0; row < this.gridState.length; row++) {
-      for (let col = 0; col < this.gridState[row].length; col++) {
-        const liveNeighbors = this.countLiveNeighbors(row, col);
+  computeNextStateForElement(gridId) {
+    const gridState = this.gridState[gridId];
+    let nextState = gridState.map((row) => [...row]);
 
-        if (this.gridState[row][col] === 1) {
+    for (let row = 0; row < gridState.length; row++) {
+      for (let col = 0; col < gridState[row].length; col++) {
+        const liveNeighbors = this.countLiveNeighborsForGrid(gridId, row, col);
+
+        if (gridState[row][col] === 1) {
           // Any live cell with fewer than 2 or more than 3 live neighbors dies
           if (liveNeighbors < 2 || liveNeighbors > 3) {
             nextState[row][col] = 0;
@@ -192,11 +231,11 @@ class GOLCanvas {
     }
 
     // Update the grid state and redraw
-    this.gridState = nextState;
-    this.invalidateImageDataCache();
+    this.gridState[gridId] = nextState;
   }
 
-  countLiveNeighbors(row, col) {
+  countLiveNeighborsForGrid(gridId, row, col) {
+    const gridState = this.gridState[gridId];
     let liveNeighbors = 0;
     const directions = [
       [-1, -1],
@@ -215,11 +254,11 @@ class GOLCanvas {
 
       if (
         newRow >= 0 &&
-        newRow < this.gridState.length &&
+        newRow < gridState.length &&
         newCol >= 0 &&
-        newCol < this.gridState[0].length
+        newCol < gridState[0].length
       ) {
-        liveNeighbors += this.gridState[newRow][newCol];
+        liveNeighbors += gridState[newRow][newCol];
       }
     }
 
@@ -265,7 +304,17 @@ class GOLCanvas {
   }
 
   drawStoredGrid(drawCoordinateGrid = false) {
-    const targetEl = document.querySelector("#gol-start");
+    const golHeaders = document.querySelectorAll(".gol-header");
+
+    for (let header of golHeaders) {
+      const gridState = this.gridState[header.id];
+      this.drawGridForElement(header, drawCoordinateGrid, gridState);
+    }
+
+    this.invalidateImageDataCache();
+  }
+
+  drawGridForElement(targetEl, drawCoordinateGrid, gridState) {
     const targetRect = targetEl.getBoundingClientRect();
     const canvasRect = this.canvas.getBoundingClientRect();
 
@@ -273,8 +322,10 @@ class GOLCanvas {
     const canvasX = (targetRect.left - canvasRect.left) * this.dpr;
     const canvasY = (targetRect.top - canvasRect.top) * this.dpr;
 
-    const gridHeight = this.gridState.length;
-    const gridWidth = this.gridState[0].length;
+    const gridHeight = gridState.length;
+    const gridWidth = gridState[0].length;
+
+    let originOffset = this.getGridOffsetForGridId(targetEl.id);
 
     // Get image data at the actual resolution
     const imageData = this.getCanvasImageData();
@@ -283,10 +334,10 @@ class GOLCanvas {
     for (let row = 0; row < gridHeight; row++) {
       for (let col = 0; col < gridWidth; col++) {
         const baseX = Math.floor(
-          canvasX + (col - this.originOffset.x) * this.cellSize,
+          canvasX + (col - originOffset.x) * this.cellSize,
         );
         const baseY = Math.floor(
-          canvasY + (row - this.originOffset.y) * this.cellSize,
+          canvasY + (row - originOffset.y) * this.cellSize,
         );
 
         // Draw the grid cell
@@ -304,7 +355,7 @@ class GOLCanvas {
               const i = (pixelX + pixelY * this.canvas.width) * 4;
 
               // Set cell color based on state: Green for grid lines, White for live cells, and Transparent for dead cells
-              if (this.gridState[row][col] === 1) {
+              if (gridState[row][col] === 1) {
                 data[i] = 201; // R
                 data[i + 1] = 201; // G
                 data[i + 2] = 201; // B
@@ -326,42 +377,11 @@ class GOLCanvas {
       }
     }
 
+    this.originOffsets[targetEl.id] = { ...originOffset };
+
     this.ctx.putImageData(imageData, 0, 0);
-    this.invalidateImageDataCache();
   }
 }
-
-const LETTERS = {
-  A: [
-    [0, 1, 0],
-    [1, 0, 1],
-    [1, 1, 1],
-    [1, 0, 1],
-    [1, 0, 1],
-  ],
-  r: [
-    [0, 0],
-    [1, 1],
-    [1, 0],
-    [1, 0],
-    [1, 0],
-  ],
-  t: [
-    [1, 0],
-    [1, 1],
-    [1, 0],
-    [1, 0],
-    [1, 1],
-  ],
-  i: [[1], [0], [1], [1], [1]],
-  s: [
-    [0, 0, 0],
-    [1, 1, 1],
-    [1, 0, 0],
-    [0, 0, 1],
-    [1, 1, 1],
-  ],
-};
 
 let golCanvas;
 
