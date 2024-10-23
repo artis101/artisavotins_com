@@ -9,8 +9,11 @@ class GOLCanvas {
     this.imageDataCache = null;
     this.isAnimating = false;
     this.gridState = []; // Stores the state of the grid (1 for live, 0 for dead)
+    this.intervalId = null; // For GOL animation interval
+    this.cellSize = null; // Fixed cell size for the simulation
 
     this.initCanvas();
+    this.addEventListeners();
   }
 
   initCanvas() {
@@ -37,13 +40,26 @@ class GOLCanvas {
     }
   }
 
+  addEventListeners() {
+    document.body.addEventListener("click", () => {
+      if (this.intervalId) {
+        clearInterval(this.intervalId);
+        this.intervalId = null;
+        console.log("Stopped GOL Simulation");
+      } else {
+        this.startGOLSimulation();
+        console.log("Started GOL Simulation");
+      }
+    });
+  }
+
   initializeGridState() {
     const targetEl = document.querySelector("#gol-start");
     const targetRect = targetEl.getBoundingClientRect();
     const targetHeight = targetRect.height;
 
     const gridHeight = 9; // Number of cells vertically
-    const cellSize = Math.floor((targetHeight / gridHeight) * this.dpr);
+    this.cellSize = Math.floor((targetHeight / gridHeight) * this.dpr); // Fixed cell size
 
     // Calculate grid width based on the word "Artis"
     let totalWidthCells = 0;
@@ -83,6 +99,129 @@ class GOLCanvas {
         startX += LETTERS[letter][0].length + 1; // Move to the next letter position, with 1 column gap
       }
     }
+  }
+
+  startGOLSimulation() {
+    // Set an interval to update the grid state every 500 milliseconds
+    this.intervalId = setInterval(() => {
+      this.expandGridIfNecessary();
+      this.markOffScreenCellsAsDead();
+      this.computeNextState();
+    }, 100);
+  }
+
+  expandGridIfNecessary() {
+    // Check if any live cells are on the edge, and expand the grid accordingly
+    let expandTop = false,
+      expandBottom = false,
+      expandLeft = false,
+      expandRight = false;
+
+    for (let row = 0; row < this.gridState.length; row++) {
+      if (this.gridState[row][0] === 1) expandLeft = true;
+      if (this.gridState[row][this.gridState[row].length - 1] === 1)
+        expandRight = true;
+    }
+
+    for (let col = 0; col < this.gridState[0].length; col++) {
+      if (this.gridState[0][col] === 1) expandTop = true;
+      if (this.gridState[this.gridState.length - 1][col] === 1)
+        expandBottom = true;
+    }
+
+    if (expandTop) {
+      this.gridState.unshift(Array(this.gridState[0].length).fill(0));
+    }
+    if (expandBottom) {
+      this.gridState.push(Array(this.gridState[0].length).fill(0));
+    }
+    if (expandLeft) {
+      for (let row = 0; row < this.gridState.length; row++) {
+        this.gridState[row].unshift(0);
+      }
+    }
+    if (expandRight) {
+      for (let row = 0; row < this.gridState.length; row++) {
+        this.gridState[row].push(0);
+      }
+    }
+
+    // Invalidate cache
+    this.invalidateImageDataCache();
+  }
+
+  markOffScreenCellsAsDead() {
+    // Calculate visible bounds based on canvas size and cell size
+    const visibleWidthCells = Math.ceil(this.canvas.width / this.cellSize);
+    const visibleHeightCells = Math.ceil(this.canvas.height / this.cellSize);
+
+    // Mark cells outside of the visible area as dead
+    for (let row = 0; row < this.gridState.length; row++) {
+      for (let col = 0; col < this.gridState[row].length; col++) {
+        if (row >= visibleHeightCells || col >= visibleWidthCells) {
+          this.gridState[row][col] = 0;
+        }
+      }
+    }
+
+    // Invalidate cache
+    this.invalidateImageDataCache();
+  }
+
+  computeNextState() {
+    const nextState = this.gridState.map((row) => [...row]);
+
+    for (let row = 0; row < this.gridState.length; row++) {
+      for (let col = 0; col < this.gridState[row].length; col++) {
+        const liveNeighbors = this.countLiveNeighbors(row, col);
+
+        if (this.gridState[row][col] === 1) {
+          // Any live cell with fewer than 2 or more than 3 live neighbors dies
+          if (liveNeighbors < 2 || liveNeighbors > 3) {
+            nextState[row][col] = 0;
+          }
+        } else {
+          // Any dead cell with exactly 3 live neighbors becomes alive
+          if (liveNeighbors === 3) {
+            nextState[row][col] = 1;
+          }
+        }
+      }
+    }
+
+    // Update the grid state and redraw
+    this.gridState = nextState;
+    this.invalidateImageDataCache();
+  }
+
+  countLiveNeighbors(row, col) {
+    let liveNeighbors = 0;
+    const directions = [
+      [-1, -1],
+      [-1, 0],
+      [-1, 1],
+      [0, -1],
+      [0, 1],
+      [1, -1],
+      [1, 0],
+      [1, 1],
+    ];
+
+    for (let [dRow, dCol] of directions) {
+      const newRow = row + dRow;
+      const newCol = col + dCol;
+
+      if (
+        newRow >= 0 &&
+        newRow < this.gridState.length &&
+        newCol >= 0 &&
+        newCol < this.gridState[0].length
+      ) {
+        liveNeighbors += this.gridState[newRow][newCol];
+      }
+    }
+
+    return liveNeighbors;
   }
 
   getCanvasImageData() {
@@ -131,10 +270,8 @@ class GOLCanvas {
     // Convert target coordinates to canvas coordinates
     const canvasX = (targetRect.left - canvasRect.left) * this.dpr;
     const canvasY = (targetRect.top - canvasRect.top) * this.dpr;
-    const targetHeight = targetRect.height;
 
     const gridHeight = this.gridState.length;
-    const cellSize = Math.floor((targetHeight / gridHeight) * this.dpr);
     const gridWidth = this.gridState[0].length;
 
     // Get image data at the actual resolution
@@ -143,12 +280,12 @@ class GOLCanvas {
 
     for (let row = 0; row < gridHeight; row++) {
       for (let col = 0; col < gridWidth; col++) {
-        const baseX = Math.floor(canvasX + col * cellSize);
-        const baseY = Math.floor(canvasY + row * cellSize);
+        const baseX = Math.floor(canvasX + col * this.cellSize);
+        const baseY = Math.floor(canvasY + row * this.cellSize);
 
         // Draw the grid cell
-        for (let y = 0; y < cellSize; y++) {
-          for (let x = 0; x < cellSize; x++) {
+        for (let y = 0; y < this.cellSize; y++) {
+          for (let x = 0; x < this.cellSize; x++) {
             const pixelX = baseX + x;
             const pixelY = baseY + y;
 
@@ -166,7 +303,7 @@ class GOLCanvas {
                 data[i + 1] = 201; // G
                 data[i + 2] = 201; // B
                 data[i + 3] = 255; // A
-              } else if (x % cellSize === 0 || y % cellSize === 0) {
+              } else if (x % this.cellSize === 0 || y % this.cellSize === 0) {
                 data[i] = 0; // R
                 data[i + 1] = 255; // G
                 data[i + 2] = 0; // B
