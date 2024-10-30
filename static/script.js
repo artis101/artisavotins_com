@@ -12,19 +12,30 @@ import { LETTERS } from "./letters.js";
  * @typedef {Object.<string, Offset>} OriginOffsets
  */
 
+/**
+ * @typedef {Object.<string, number[][]>} GridState
+ */
+
 class GOLCanvas {
   /**
    * @constructor
    */
   constructor() {
+    /** @type {HTMLCanvasElement} */
     this.canvas = document.querySelector("#canvas");
+    /** @type {CanvasRenderingContext2D} */
     this.ctx = this.canvas.getContext("2d", { willReadFrequently: true });
     this.dpr = window.devicePixelRatio || 1;
+    /** @type {DOMRect} */
     this.rect = this.canvas.getBoundingClientRect();
+    /** @type {ImageData} */
     this.imageDataCache = null;
     this.isAnimating = false;
+    /** @type {GridState} */
     this.gridState = {}; // Stores the state of the grid (1 for live, 0 for dead)
+    /** @type {number} */
     this.intervalId = null; // For GOL animation interval
+    /** @type {number} */
     this.cellSize = null; // Fixed cell size for the simulation
     /** @type {OriginOffsets} */
     this.originOffsets = {}; // Offset for grid expansion
@@ -35,7 +46,7 @@ class GOLCanvas {
 
   initState() {
     document.querySelectorAll(".gol-header").forEach((header) => {
-      header.style.visibility = "visible";
+      header.style.color = "#575757";
     });
     this.rect = this.canvas.getBoundingClientRect();
 
@@ -62,8 +73,8 @@ class GOLCanvas {
 
   /** Get the grid offset for the given grid ID
    * @param {string} gridId - The ID of the grid
-   * @returns {Object} - The grid offset object
-   * */
+   * @returns {Offset} - The grid offset object
+   */
   getGridOffsetForGridId(gridId) {
     if (!this.originOffsets[gridId]) {
       this.originOffsets[gridId] = { x: 0, y: 0 };
@@ -95,6 +106,10 @@ class GOLCanvas {
     }
   }
 
+  /**
+   * Initialize the grid state for the given target element
+   * @param {HTMLElement} targetEl - The target element to initialize the grid state for
+   */
   initializeGridStateForElement(targetEl) {
     const targetRect = targetEl.getBoundingClientRect();
     const targetHeight = targetRect.height;
@@ -119,6 +134,7 @@ class GOLCanvas {
 
     const gridWidth = totalWidthCells; // Number of cells horizontally
 
+    /** @type {number[][]} */
     const gridState = Array.from({ length: gridHeight }, () =>
       Array(gridWidth).fill(0),
     );
@@ -131,6 +147,11 @@ class GOLCanvas {
     targetEl.style.visibility = "hidden";
   }
 
+  /**
+   * Add the letters of the word to the grid state
+   * @param {string} word - The word to add to the grid state
+   * @param {number[][]} gridState - The grid state to add the letters to
+   */
   addLettersToGridState(word, gridState) {
     let startX = 0; // Start from column 0 to align letters to the very left side
     let startY = 3; // Start from row 3 to leave empty rows at the top
@@ -172,6 +193,10 @@ class GOLCanvas {
     }
   }
 
+  /**
+   * Expand the grid to accommodate live cells on the edge
+   * @param {string} gridId - The ID of the grid to expand
+   */
   expandGridForElement(gridId) {
     // Check if any live cells are on the edge, and expand the grid accordingly
     let expandTop = false,
@@ -230,6 +255,10 @@ class GOLCanvas {
     this.invalidateImageDataCache();
   }
 
+  /**
+   * Compute the next state of the grid based on the current state
+   * @param {string} gridId - The ID of the grid to compute the next state for
+   */
   computeElementNextState(gridId) {
     const gridState = this.gridState[gridId];
     let nextState = gridState.map((row) => [...row]);
@@ -256,6 +285,14 @@ class GOLCanvas {
     this.gridState[gridId] = nextState;
   }
 
+  /**
+   * Count the number of live neighbors for the given cell in the
+   * grid with the specified ID
+   * @param {string} gridId - The ID of the grid to count live neighbors for
+   * @param {number} row - The row index
+   * @param {number} col - The column index
+   * @returns {number} - The number of live neighbors for the cell
+   */
   countLiveNeighborsForGrid(gridId, row, col) {
     const gridState = this.gridState[gridId];
     let liveNeighbors = 0;
@@ -340,6 +377,15 @@ class GOLCanvas {
     this.invalidateImageDataCache();
   }
 
+  /**
+   * Draw the grid for the given target element
+   * @param {HTMLElement} targetEl - The target element to draw the grid for
+   * @param {boolean} drawCoordinateGrid - Whether to draw the
+   * coordinate grid
+   * @param {number[][]} gridState - The grid state to draw
+   * @param {Uint8ClampedArray} data - The image data array to
+   * draw to
+   */
   drawGridForElement(targetEl, drawCoordinateGrid, gridState, data) {
     const targetRect = targetEl.getBoundingClientRect();
     const canvasRect = this.canvas.getBoundingClientRect();
