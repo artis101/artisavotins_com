@@ -1,119 +1,135 @@
-use std::error::Error;
-use std::path::Path;
-use std::sync::Arc;
-use tokio::fs;
-use tokio::io::{AsyncReadExt, AsyncWriteExt};
-use tokio::net::{TcpListener, TcpStream};
-use tokio::sync::OnceCell;
-mod ssi_processor;
-use ssi_processor::SSIProcessor;
+use http_body_util::Full;
+use hyper::body::Bytes;
+use hyper::server::conn::http1;
+use hyper::service::service_fn;
+use hyper::StatusCode;
+use hyper::{Request, Response};
+use hyper_util::rt::{TokioIo, TokioTimer};
+use std::convert::Infallible;
+use std::fs;
+use std::net::SocketAddr;
+use std::path::{Path, PathBuf};
+use tokio::net::TcpListener;
 
-static TEMPLATE_CONTENT: OnceCell<Arc<String>> = OnceCell::const_new();
-const LISTEN_ADDR: &str = "0.0.0.0";
+const LISTEN_ADDR: [u8; 4] = [0, 0, 0, 0];
 const PORT: u16 = 1337;
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
-    let listener = TcpListener::bind(format!("{LISTEN_ADDR}:{PORT}")).await?;
-    println!("Listening on http://{LISTEN_ADDR}:{PORT}");
+// Function to handle template files (HTML only)
+async fn handle_template(path: &str) -> Response<Full<Bytes>> {
+    // Construct path relative to project root
+    let template_dir = PathBuf::from("templates");
+    let request_path = path.trim_start_matches("/templates/");
+    let path = template_dir.join(request_path);
+    println!("Request for template: {:?}", path);
 
-    // Initialize the template content
-    TEMPLATE_CONTENT
-        .get_or_init(|| async {
-            let content = tokio::fs::read_to_string("templates/index.html")
-                .await
-                .expect("Failed to read template file");
-            Arc::new(content)
-        })
-        .await;
+    // Check if it's an HTML file
+    if let Some(extension) = path.extension() {
+        if extension != "html" {
+            let mut response = Response::new(Full::new(Bytes::from("Not Found")));
+            *response.status_mut() = StatusCode::NOT_FOUND;
+            return response;
+        }
+    } else {
+        let mut response = Response::new(Full::new(Bytes::from("Not Found")));
+        *response.status_mut() = StatusCode::NOT_FOUND;
+        return response;
+    }
+
+    if path.exists() && path.starts_with(&template_dir) {
+        match fs::read(&path) {
+            Ok(contents) => {
+                let mut response = Response::new(Full::new(Bytes::from(contents)));
+                response
+                    .headers_mut()
+                    .insert("content-type", "text/html".parse().unwrap());
+                response
+            }
+            Err(_) => {
+                let mut response = Response::new(Full::new(Bytes::from("Internal Server Error")));
+                *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
+                response
+            }
+        }
+    } else {
+        let mut response = Response::new(Full::new(Bytes::from("Not Found")));
+        *response.status_mut() = StatusCode::NOT_FOUND;
+        response
+    }
+}
+
+// Function to handle static files
+async fn handle_static_file(path: &str) -> Response<Full<Bytes>> {
+    let static_dir = PathBuf::from("static");
+    let request_path = path.trim_start_matches("/static/");
+    let path = static_dir.join(request_path);
+    println!("Request for static file: {:?}", path);
+
+    if path.exists() && path.starts_with(&static_dir) {
+        match fs::read(&path) {
+            Ok(contents) => {
+                let mut response = Response::new(Full::new(Bytes::from(contents)));
+                if let Some(ext) = Path::new(&path).extension() {
+                    let content_type = match ext.to_str().unwrap_or("") {
+                        "html" => "text/html",
+                        "css" => "text/css",
+                        "js" => "application/javascript",
+                        "png" => "image/png",
+                        "jpg" | "jpeg" => "image/jpeg",
+                        _ => "application/octet-stream",
+                    };
+                    response
+                        .headers_mut()
+                        .insert("content-type", content_type.parse().unwrap());
+                }
+                response
+            }
+            Err(_) => {
+                let mut response = Response::new(Full::new(Bytes::from("Internal Server Error")));
+                *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
+                response
+            }
+        }
+    } else {
+        let mut response = Response::new(Full::new(Bytes::from("Not Found")));
+        *response.status_mut() = StatusCode::NOT_FOUND;
+        response
+    }
+}
+
+// Router function that handles all requests
+async fn router(req: Request<impl hyper::body::Body>) -> Result<Response<Full<Bytes>>, Infallible> {
+    let uri = req.uri().path();
+
+    // Route requests based on path
+    let response = match uri {
+        "/" => handle_template("/templates/index.html").await,
+        path if path.starts_with("/static/") => handle_static_file(path).await,
+        _ => handle_template(uri).await,
+    };
+
+    Ok(response)
+}
+
+#[tokio::main]
+pub async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    pretty_env_logger::init();
+    let addr: SocketAddr = (LISTEN_ADDR, PORT).into();
+    let listener = TcpListener::bind(addr).await?;
+    println!("Listening on http://{}", addr);
 
     loop {
-        let (socket, _) = listener.accept().await?;
-        tokio::spawn(async move {
-            if let Err(e) = handle_connection(socket).await {
-                eprintln!("Failed to handle connection: {}", e);
+        let (tcp, _) = listener.accept().await?;
+        let io = TokioIo::new(tcp);
+
+        tokio::task::spawn(async move {
+            if let Err(err) = http1::Builder::new()
+                .timer(TokioTimer::new())
+                .serve_connection(io, service_fn(router))
+                .await
+            {
+                println!("Error serving connection: {:?}", err);
             }
         });
     }
 }
 
-async fn handle_connection(mut socket: TcpStream) -> Result<(), Box<dyn Error + Send + Sync>> {
-    let request = process_request(&mut socket).await?;
-    println!("Received request:\n{}", request);
-
-    let path = extract_path(&request);
-    if path.starts_with("/static/") {
-        match serve_static_file(&path).await {
-            Ok(content) => {
-                let response = add_200_headers(&content, get_mime_type(&path));
-                write_response(&mut socket, &response).await?;
-            }
-            Err(_) => {
-                let response = add_404_headers();
-                write_response(&mut socket, &response).await?;
-            }
-        }
-    } else {
-        let template_content = TEMPLATE_CONTENT.get().expect("Template not initialized");
-        let ssi_processor = SSIProcessor::new();
-        let processed_content = ssi_processor.process(template_content);
-        let response = add_200_headers(&processed_content, "text/html; charset=utf-8");
-        write_response(&mut socket, &response).await?;
-    }
-    Ok(())
-}
-
-async fn process_request(socket: &mut TcpStream) -> Result<String, Box<dyn Error + Send + Sync>> {
-    let mut buffer = [0; 1024];
-    let bytes_read = socket.read(&mut buffer).await?;
-    if bytes_read == 0 {
-        return Err("Empty request".into());
-    }
-    Ok(String::from_utf8_lossy(&buffer[..bytes_read]).to_string())
-}
-
-async fn write_response(
-    socket: &mut TcpStream,
-    response: &str,
-) -> Result<(), Box<dyn Error + Send + Sync>> {
-    socket.write_all(response.as_bytes()).await?;
-    socket.flush().await?;
-    Ok(())
-}
-
-fn add_200_headers(body: &str, content_type: &str) -> String {
-    format!(
-        "HTTP/1.1 200 OK\r\nContent-Type: {}\r\nContent-Length: {}\r\n\r\n{}",
-        content_type,
-        body.len(),
-        body
-    )
-}
-
-fn add_404_headers() -> String {
-    "HTTP/1.1 404 Not Found\r\nContent-Type: text/plain\r\nContent-Length: 9\r\n\r\nNot Found"
-        .to_string()
-}
-
-fn get_mime_type(path: &str) -> &str {
-    match Path::new(path).extension().and_then(|ext| ext.to_str()) {
-        Some("css") => "text/css",
-        Some("js") => "application/javascript",
-        Some("html") => "text/html",
-        _ => "application/octet-stream",
-    }
-}
-
-fn extract_path(request: &str) -> String {
-    request
-        .lines()
-        .next()
-        .and_then(|line| line.split_whitespace().nth(1))
-        .unwrap_or("/")
-        .to_string()
-}
-
-async fn serve_static_file(path: &str) -> Result<String, Box<dyn Error + Send + Sync>> {
-    let full_path = format!(".{}", path);
-    fs::read_to_string(full_path).await.map_err(|e| e.into())
-}
