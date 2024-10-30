@@ -45,9 +45,6 @@ class GOLCanvas {
   }
 
   initState() {
-    document.querySelectorAll(".gol-header").forEach((header) => {
-      header.style.color = "#575757";
-    });
     this.rect = this.canvas.getBoundingClientRect();
 
     // Set the canvas size in pixels
@@ -143,8 +140,8 @@ class GOLCanvas {
     // Add the letters to the grid state
     this.addLettersToGridState(word, gridState);
 
-    // Finally hide the original element
-    targetEl.style.visibility = "hidden";
+    // Finally dim the original element
+    targetEl.style.color = "#575757";
   }
 
   /**
