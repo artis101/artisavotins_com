@@ -2,111 +2,182 @@
 import Layout from "../layouts/Layout.astro";
 import MinesweeperBanner from "../components/MinesweeperBanner.astro";
 import WindowWithClose from "../components/WindowWithClose.tsx";
+
+// Generate the last updated date at build time
+const lastUpdated = new Date().toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long', 
+  day: 'numeric'
+});
 ---
 
 <Layout title="Artis Avotins - Personal Page">
   <WindowWithClose client:load>
-      <div class="field-row">
-        <label for="name">Name:</label>
-        <input id="name" type="text" value="Artis Avotins" readonly />
+    <div
+      class="sunken-panel"
+      style="padding: 16px; margin-bottom: 16px; background: #c0c0c0;"
+    >
+      <div style="display: flex; align-items: center; margin-bottom: 12px;">
+        <div
+          style="width: 32px; height: 32px; background: #c0c0c0; border: 2px outset #c0c0c0; margin-right: 12px; display: flex; align-items: center; justify-content: center;"
+        >
+          <span style="font-size: 16px; font-weight: bold;">👤</span>
+        </div>
+        <div>
+          <h2
+            style="margin: 0; font-size: 18px; font-weight: bold; color: #000080;"
+          >
+            Artis Avotins
+          </h2>
+          <div style="font-size: 14px; color: #666; margin-top: 2px;">
+            Builder & Programmer
+          </div>
+        </div>
       </div>
-      <div class="field-row">
-        <label for="title">Title:</label>
-        <input id="title" type="text" value="Builder & Programmer" readonly />
+      <div style="display: flex; gap: 8px;">
+        <div
+          class="sunken-panel"
+          style="padding: 8px; background: #fff; border: 1px inset #c0c0c0; flex: 1;"
+        >
+          <div style="font-size: 12px; color: #000;">
+            <strong>Experience:</strong> Yes<br />
+            <strong>Location:</strong> Remote / The EU<br />
+            <strong>Website:</strong> New age fun with a vintage feel<br />
+            <strong>Contact:</strong> Send me an email
+          </div>
+        </div>
+        <div
+          class="sunken-panel"
+          style="padding: 4px; background: #fff; border: 1px inset #c0c0c0; display: flex; align-items: center; justify-content: center;"
+        >
+          <img
+            src="/hamster-dance.gif"
+            alt="Hamster Dance"
+            style="width: 64px; height: 64px; object-fit: contain;"
+          />
+        </div>
+      </div>
+    </div>
+
+    <fieldset style="margin-bottom: 16px;">
+      <legend>💬 About Me</legend>
+      <div
+        class="sunken-panel"
+        style="padding: 12px; background: #fff; margin-bottom: 12px;"
+      >
+        <div
+          style="font-size: 16px; font-weight: bold; color: #000080; margin-bottom: 8px;"
+        >
+          👋 Hi, I'm Artis. Welcome to my website!
+        </div>
+        <div style="font-size: 14px; line-height: 1.4; color: #000;">
+          I'm a generalist with about two decades of experience in the software
+          industry. I've worked for startups and large corporations.<br />
+          I specialize in building pragmatic software products using modern tools
+          and infrastructure. I enjoy working on both frontend and backend, and I
+          make extensive use of AI tools to enhance my productivity.
+        </div>
       </div>
 
-      <fieldset>
-        <legend>About Me</legend>
-        <p>Hi, I'm Artis. Welcome to my website!</p>
-        <p>
-          I'm a generalist with over 20 years of experience in the software
-          industry. I've worked for startups and large corporations, and have
-          been a founder as well. I specialize in building pragmatic software
-          products using modern tools and infrastructure.
-        </p>
-        <p>
+      <div
+        class="sunken-panel"
+        style="padding: 12px; background: #fff; margin-bottom: 12px;"
+      >
+        <div
+          style="font-size: 14px; font-weight: bold; color: #000080; margin-bottom: 6px;"
+        >
+          🛠️ Technical Focus
+        </div>
+        <div style="font-size: 13px; line-height: 1.4; color: #000;">
           My tech stack of choice includes Python and JavaScript (TypeScript
           actually) for backend development, with Django, Flask, DRF, Express,
           and/or Next.js. For frontend, I use React, Preact, Astro, next.js or
           vanilla JS. PostgreSQL is my go-to database. I'm proficient in Linux
           and work daily on macOS or Arch Linux. I prefer containerized dev
           environments with Docker or Nix.
-        </p>
-        <p>
-          I've held roles as an individual contributor, engineering manager, and
-          contractor. On the hardware side, I like building small projects with
-          Arduino, Raspberry Pi, and ESP32. I also enjoy tinkering with Lego
-          Technic, building off-road vehicles.
-        </p>
-      </fieldset>
-
-      <fieldset>
-        <legend>Skills</legend>
-        <ul class="tree-view">
-          <li>
-            Frontend Development
-            <ul>
-              <li>JavaScript / TypeScript</li>
-              <li>React, Preact</li>
-              <li>Astro, HTML, CSS</li>
-            </ul>
-          </li>
-          <li>
-            Backend Development
-            <ul>
-              <li>Python (Django, Flask, DRF)</li>
-              <li>Node.js / Express / Next.js</li>
-              <li>PostgreSQL, Redis</li>
-            </ul>
-          </li>
-          <li>
-            DevOps & Infra
-            <ul>
-              <li>Linux (macOS & Arch)</li>
-              <li>Docker, Nix</li>
-              <li>AWS, self-hosting on Hetzner/Digital Ocean</li>
-            </ul>
-          </li>
-          <li>
-            Hardware tinkering
-            <ul>
-              <li>Arduino, Raspberry Pi, ESP32</li>
-            </ul>
-          </li>
-        </ul>
-      </fieldset>
-
-      <fieldset>
-        <legend>Contact</legend>
-        <div class="field-row">
-          <button
-            onclick="window.location.href='mailto:artis.avotins@gmail.com'"
-            >Send Email</button
-          >
-          <button onclick="window.location.href='https://twitter.com/artiscode'"
-            >𝕏</button
-          >
-          <button onclick="window.location.href='https://github.com/artis101'"
-            >GitHub</button
-          >
         </div>
-      </fieldset>
-
-      <fieldset>
-        <legend>Games</legend>
-        <div class="field-row">
-          <MinesweeperBanner />
-        </div>
-        <p>
-          I enjoy playing games in my free time. I've created a simple
-          Minesweeper game that you can play right here as a reward for visiting
-          my page.
-        </p>
-      </fieldset>
-
-      <div class="status-bar">
-        <p class="status-bar-field">Ready</p>
-        <p class="status-bar-field">Last updated: 2025</p>
       </div>
+
+      <div class="sunken-panel" style="padding: 12px; background: #fff;">
+        <div
+          style="font-size: 14px; font-weight: bold; color: #000080; margin-bottom: 6px;"
+        >
+          🎯 Experience & Interests
+        </div>
+        <div style="font-size: 13px; line-height: 1.4; color: #000;">
+          I've worked as an individual contributor, engineering manager, and
+          consultant. On the hardware side, I enjoy building small projects with
+          Arduino, Raspberry Pi, and ESP32. I also like tinkering with Lego
+          Technic and creating simple robots.
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Skills</legend>
+      <ul class="tree-view">
+        <li>
+          Frontend Development
+          <ul>
+            <li>JavaScript / TypeScript</li>
+            <li>React, Preact</li>
+            <li>Astro, HTML, CSS</li>
+          </ul>
+        </li>
+        <li>
+          Backend Development
+          <ul>
+            <li>Python (Django, Flask, DRF)</li>
+            <li>Node.js / Express / Next.js</li>
+            <li>PostgreSQL, Redis</li>
+          </ul>
+        </li>
+        <li>
+          DevOps & Infra
+          <ul>
+            <li>Linux (macOS & Arch)</li>
+            <li>Docker, Nix</li>
+            <li>AWS, self-hosting on Hetzner/Digital Ocean</li>
+          </ul>
+        </li>
+        <li>
+          Hardware tinkering
+          <ul>
+            <li>Arduino, Raspberry Pi, ESP32</li>
+          </ul>
+        </li>
+      </ul>
+    </fieldset>
+
+    <fieldset>
+      <legend>Contact</legend>
+      <div class="field-row">
+        <button onclick="window.location.href='mailto:artis.avotins@gmail.com'"
+          >Send Email</button
+        >
+        <button onclick="window.location.href='https://twitter.com/artiscode'"
+          >𝕏</button
+        >
+        <button onclick="window.location.href='https://github.com/artis101'"
+          >GitHub</button
+        >
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Games</legend>
+      <div class="field-row">
+        <MinesweeperBanner />
+      </div>
+      <p>
+        I enjoy playing games in my free time. I've created a simple Minesweeper
+        game that you can play right here as a reward for visiting my page.
+      </p>
+    </fieldset>
+
+    <div class="status-bar">
+      <p class="status-bar-field">Ready</p>
+      <p class="status-bar-field">Last updated: {lastUpdated}</p>
+    </div>
   </WindowWithClose>
 </Layout>
