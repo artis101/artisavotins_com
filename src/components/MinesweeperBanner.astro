@@ -1,0 +1,123 @@
+---
+interface Props {
+  href?: string;
+}
+
+const { href = "/minesweeper" } = Astro.props;
+---
+
+<a
+  href={href}
+  class="minesweeper-banner"
+  title="Free Minesweeper game for you to enjoy!"
+>
+  <div class="banner-placeholder">
+    <div class="banner-content">
+      <span class="banner-text">FREE<br />MINESWEEPER</span>
+    </div>
+  </div>
+</a>
+
+<style>
+  .minesweeper-banner {
+    display: block;
+    text-decoration: none;
+    width: 88px;
+    height: 31px;
+    margin: 4px;
+  }
+
+  .banner-placeholder {
+    width: 88px;
+    height: 31px;
+    background: linear-gradient(
+      45deg,
+      #ff0000 0%,
+      #ffff00 16.66%,
+      #00ff00 33.33%,
+      #00ffff 50%,
+      #0000ff 66.66%,
+      #ff00ff 83.33%,
+      #ff0000 100%
+    );
+    background-size: 200% 200%;
+    border: 2px outset #ffff00;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.1s ease;
+    animation:
+      rainbow-shift 5s ease-in-out infinite,
+      blink 1s ease-in-out infinite alternate;
+    box-shadow: 0 0 4px rgba(255, 255, 0, 0.8);
+  }
+
+  .banner-placeholder:hover {
+    animation:
+      rainbow-shift 1.5s linear infinite,
+      blink 0.3s ease-in-out infinite alternate;
+    box-shadow: 0 0 8px rgba(255, 255, 0, 1);
+    transform: scale(1.05);
+  }
+
+  .banner-placeholder:active {
+    border: 2px inset #ffff00;
+    animation: rainbow-shift 0.5s linear infinite;
+    transform: scale(0.95);
+  }
+
+  @keyframes rainbow-shift {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  @keyframes blink {
+    0% {
+      opacity: 0.8;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  .banner-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #000;
+    font-family: "Comic Sans MS", cursive;
+    font-size: 10px;
+    font-weight: bold;
+    line-height: 1;
+    text-shadow:
+      1px 1px 0px #fff,
+      -1px -1px 0px #fff,
+      1px -1px 0px #fff,
+      -1px 1px 0px #fff;
+  }
+
+  .banner-text {
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    animation: text-bounce 1s ease-in-out infinite alternate;
+  }
+
+  @keyframes text-bounce {
+    0% {
+      transform: translateY(0px);
+    }
+    100% {
+      transform: translateY(-1px);
+    }
+  }
+</style>
