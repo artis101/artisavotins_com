@@ -26,7 +26,10 @@ const Minesweeper = () => {
         <div className="title-bar-controls">
           <button aria-label="Minimize"></button>
           <button aria-label="Maximize"></button>
-          <button aria-label="Close"></button>
+          <button
+            aria-label="Close"
+            onClick={() => (window.location.href = "/")}
+          ></button>
         </div>
       </div>
       <div className="window-body">
