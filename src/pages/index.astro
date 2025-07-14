@@ -1,0 +1,108 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Artis Avotins - Personal Page">
+  <div class="window">
+    <div class="title-bar">
+      <div class="title-bar-text">Artis Avotins - Personal Page</div>
+      <div class="title-bar-controls">
+        <button aria-label="Minimize"></button>
+        <button aria-label="Maximize"></button>
+        <button aria-label="Close"></button>
+      </div>
+    </div>
+    <div class="window-body">
+      <div class="field-row">
+        <label for="name">Name:</label>
+        <input id="name" type="text" value="Artis Avotins" readonly />
+      </div>
+      <div class="field-row">
+        <label for="title">Title:</label>
+        <input id="title" type="text" value="Builder & Programmer" readonly />
+      </div>
+
+      <fieldset>
+        <legend>About Me</legend>
+        <p>Hi, I'm Artis. Welcome to my website!</p>
+        <p>
+          I'm a generalist with over 20 years of experience in the software
+          industry. I've worked for startups and large corporations, and have
+          been a founder as well. I specialize in building pragmatic software
+          products using modern tools and infrastructure.
+        </p>
+        <p>
+          My tech stack of choice includes Python and JavaScript (TypeScript
+          actually) for backend development, with Django, Flask, DRF, Express,
+          and/or Next.js. For frontend, I use React, Preact, Astro, next.js or
+          vanilla JS. PostgreSQL is my go-to database. I'm proficient in Linux
+          and work daily on macOS or Arch Linux. I prefer containerized dev
+          environments with Docker or Nix.
+        </p>
+        <p>
+          I've held roles as an individual contributor, engineering manager, and
+          contractor. On the hardware side, I like building small projects with
+          Arduino, Raspberry Pi, and ESP32. I also enjoy tinkering with Lego
+          Technic, building off-road vehicles.
+        </p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Skills</legend>
+        <ul class="tree-view">
+          <li>
+            Frontend Development
+            <ul>
+              <li>JavaScript / TypeScript</li>
+              <li>React, Preact</li>
+              <li>Astro, HTML, CSS</li>
+            </ul>
+          </li>
+          <li>
+            Backend Development
+            <ul>
+              <li>Python (Django, Flask, DRF)</li>
+              <li>Node.js / Express / Next.js</li>
+              <li>PostgreSQL, Redis</li>
+            </ul>
+          </li>
+          <li>
+            DevOps & Infra
+            <ul>
+              <li>Linux (macOS & Arch)</li>
+              <li>Docker, Nix</li>
+              <li>AWS, self-hosting on Hetzner/Digital Ocean</li>
+            </ul>
+          </li>
+          <li>
+            Hardware tinkering
+            <ul>
+              <li>Arduino, Raspberry Pi, ESP32</li>
+            </ul>
+          </li>
+        </ul>
+      </fieldset>
+
+      <fieldset>
+        <legend>Contact</legend>
+        <div class="field-row">
+          <button
+            onclick="window.location.href='mailto:artis.avotins@gmail.com'"
+            >Send Email</button
+          >
+          <button onclick="window.location.href='https://twitter.com/artiscode'"
+            >𝕏</button
+          >
+          <button onclick="window.location.href='https://github.com/artis101'"
+            >GitHub</button
+          >
+        </div>
+      </fieldset>
+
+      <div class="status-bar">
+        <p class="status-bar-field">Ready</p>
+        <p class="status-bar-field">Last updated: 2025</p>
+      </div>
+    </div>
+  </div>
+</Layout>
