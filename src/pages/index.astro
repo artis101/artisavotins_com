@@ -1,19 +1,11 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import MinesweeperBanner from "../components/MinesweeperBanner.astro";
+import WindowWithClose from "../components/WindowWithClose.tsx";
 ---
 
 <Layout title="Artis Avotins - Personal Page">
-  <div class="window">
-    <div class="title-bar">
-      <div class="title-bar-text">Artis Avotins - Personal Page</div>
-      <div class="title-bar-controls">
-        <!-- <button aria-label="Minimize"></button>
-        <button aria-label="Maximize"></button> -->
-        <button aria-label="Close"></button>
-      </div>
-    </div>
-    <div class="window-body">
+  <WindowWithClose client:load>
       <div class="field-row">
         <label for="name">Name:</label>
         <input id="name" type="text" value="Artis Avotins" readonly />
@@ -116,6 +108,5 @@ import MinesweeperBanner from "../components/MinesweeperBanner.astro";
         <p class="status-bar-field">Ready</p>
         <p class="status-bar-field">Last updated: 2025</p>
       </div>
-    </div>
-  </div>
+  </WindowWithClose>
 </Layout>
