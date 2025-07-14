@@ -24,8 +24,8 @@ const Minesweeper = () => {
       <div className="title-bar" style={{ padding: "2px 4px" }}>
         <div className="title-bar-text">Minesweeper</div>
         <div className="title-bar-controls">
-          <button aria-label="Minimize"></button>
-          <button aria-label="Maximize"></button>
+          {/* <button aria-label="Minimize"></button>
+          <button aria-label="Maximize"></button> */}
           <button
             aria-label="Close"
             onClick={() => (window.location.href = "/")}
