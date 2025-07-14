@@ -1,19 +1,19 @@
---- 
+---
 import Layout from "../layouts/Layout.astro";
 import Minesweeper from "../components/Minesweeper.tsx";
 ---
 
 <Layout title="Minesweeper">
-    <main>
-        <Minesweeper client:load />
-    </main>
+  <main>
+    <Minesweeper client:load />
+  </main>
 </Layout>
 
 <style>
-    main {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100%;
-    }
+  main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+  }
 </style>
