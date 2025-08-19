@@ -1,11 +1,9 @@
 import type { Board, Cell, Position, GameConfig } from "../types/minesweeper";
 
-export const createBoard = (
-  config: GameConfig,
-  firstClick: Position
-): Board => {
-  const { boardSize, numMines } = config;
-  const newBoard: Board = Array(boardSize * boardSize)
+import type { Board, Cell, Position, GameConfig } from "../types/minesweeper";
+
+const initializeEmptyBoard = (boardSize: number): Board => {
+  return Array(boardSize * boardSize)
     .fill(null)
     .map((_, index) => {
       const x = index % boardSize;
@@ -19,8 +17,10 @@ export const createBoard = (
         adjacentMines: 0,
       };
     });
+};
 
-  // Generate mine locations
+const placeMines = (board: Board, config: GameConfig, firstClick: Position): void => {
+  const { boardSize, numMines } = config;
   const firstClickIndex = firstClick.y * boardSize + firstClick.x;
   const possibleMineLocations = Array.from(
     { length: boardSize * boardSize },
@@ -39,22 +39,52 @@ export const createBoard = (
   // Place mines
   for (let i = 0; i < numMines; i++) {
     const mineIndex = possibleMineLocations[i];
-    newBoard[mineIndex].isMine = true;
+    board[mineIndex].isMine = true;
   }
+};
 
-  // Calculate adjacent mines for each cell
-  for (let i = 0; i < newBoard.length; i++) {
-    if (!newBoard[i].isMine) {
-      newBoard[i].adjacentMines = getAdjacentMines(
-        newBoard,
-        newBoard[i].x,
-        newBoard[i].y,
+const calculateAdjacentMines = (board: Board, boardSize: number): void => {
+  for (let i = 0; i < board.length; i++) {
+    if (!board[i].isMine) {
+      board[i].adjacentMines = getAdjacentMines(
+        board,
+        board[i].x,
+        board[i].y,
         boardSize
       );
     }
   }
+};
 
+export const createBoard = (
+  config: GameConfig,
+  firstClick: Position
+): Board => {
+  const newBoard = initializeEmptyBoard(config.boardSize);
+  placeMines(newBoard, config, firstClick);
+  calculateAdjacentMines(newBoard, config.boardSize);
   return newBoard;
+};
+
+export const getAdjacentCells = (
+  board: Board,
+  x: number,
+  y: number,
+  boardSize: number
+): Cell[] => {
+  const adjacentCells: Cell[] = [];
+  for (let i = -1; i <= 1; i++) {
+    for (let j = -1; j <= 1; j++) {
+      if (i === 0 && j === 0) continue;
+      const newX = x + i;
+      const newY = y + j;
+      if (newX >= 0 && newX < boardSize && newY >= 0 && newY < boardSize) {
+        const index = newY * boardSize + newX;
+        adjacentCells.push(board[index]);
+      }
+    }
+  }
+  return adjacentCells;
 };
 
 export const getAdjacentMines = (
@@ -63,21 +93,8 @@ export const getAdjacentMines = (
   y: number,
   boardSize: number
 ): number => {
-  let count = 0;
-  for (let i = -1; i <= 1; i++) {
-    for (let j = -1; j <= 1; j++) {
-      if (i === 0 && j === 0) continue;
-      const newX = x + i;
-      const newY = y + j;
-      if (newX >= 0 && newX < boardSize && newY >= 0 && newY < boardSize) {
-        const index = newY * boardSize + newX;
-        if (board[index].isMine) {
-          count++;
-        }
-      }
-    }
-  }
-  return count;
+  return getAdjacentCells(board, x, y, boardSize).filter((cell) => cell.isMine)
+    .length;
 };
 
 export const revealCell = (
