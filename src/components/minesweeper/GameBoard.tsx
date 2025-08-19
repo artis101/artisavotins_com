@@ -1,29 +1,27 @@
 import React from "react";
 import Cell from "./Cell";
 import type { Board, GameConfig } from "../../types/minesweeper";
+import styles from "../../styles/minesweeper.module.css";
 
 interface GameBoardProps {
   board: Board;
   config: GameConfig;
   onCellClick: (x: number, y: number) => void;
   onCellRightClick: (e: React.MouseEvent, x: number, y: number) => void;
+  onCellMouseDown: (e: React.MouseEvent, x: number, y: number) => void;
+  disabled: boolean;
 }
 
-const GameBoard: React.FC<GameBoardProps> = ({
-  board,
-  config,
-  onCellClick,
-  onCellRightClick,
-}) => {
+const GameBoard: React.FC<GameBoardProps> = ({ board, config, onCellClick, onCellRightClick, onCellMouseDown, disabled }) => {
   const cells =
     board.length > 0
       ? board
       : Array(config.boardSize * config.boardSize).fill(null);
 
   return (
-    <div className="minesweeper-game-board">
+    <div className={styles.minesweeperGameBoard}>
       <div
-        className="minesweeper-game-grid"
+        className={styles.minesweeperGameGrid}
         style={{
           gridTemplateColumns: `repeat(${config.boardSize}, 24px)`,
         }}
@@ -37,8 +35,10 @@ const GameBoard: React.FC<GameBoardProps> = ({
               cell={cell}
               onCellClick={onCellClick}
               onCellRightClick={onCellRightClick}
+              onCellMouseDown={onCellMouseDown}
               x={x}
               y={y}
+              disabled={disabled}
             />
           );
         })}
