@@ -1,4 +1,5 @@
 import React from "react";
+import "../../styles/minesweeper.css";
 import type { Board, GameConfig, Cell as CellType } from "../../types/minesweeper";
 
 interface GameBoardProps {

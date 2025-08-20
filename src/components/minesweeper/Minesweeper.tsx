@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import "../../styles/minesweeper.css";
 import GameBoard from "./GameBoard";
 import StatusPanel from "./StatusPanel";
 import DifficultySelector from "./DifficultySelector";
