@@ -2,6 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import MinesweeperBanner from "../components/MinesweeperBanner.astro";
 import WindowWithClose from "../components/WindowWithClose.tsx";
+import "../styles/index.css";
 
 // Generate the last updated date at build time
 const lastUpdated = new Date().toLocaleDateString('en-US', {
@@ -13,64 +14,38 @@ const lastUpdated = new Date().toLocaleDateString('en-US', {
 
 <Layout title="Artis Avotins - Personal Page">
   <WindowWithClose client:load>
-    <div
-      class="sunken-panel"
-      style="padding: 16px; margin-bottom: 16px; background: #c0c0c0;"
-    >
-      <div style="display: flex; align-items: center; margin-bottom: 12px;">
-        <div
-          style="width: 32px; height: 32px; background: #c0c0c0; border: 2px outset #c0c0c0; margin-right: 12px; display: flex; align-items: center; justify-content: center;"
-        >
-          <span style="font-size: 16px; font-weight: bold;">👤</span>
+    <div class="sunken-panel top-panel">
+      <div class="top-panel-header">
+        <div class="top-panel-icon">
+          <span>👤</span>
         </div>
-        <div>
-          <h2
-            style="margin: 0; font-size: 18px; font-weight: bold; color: #000080;"
-          >
-            Artis Avotins
-          </h2>
-          <div style="font-size: 14px; color: #666; margin-top: 2px;">
-            Builder & Programmer
-          </div>
+        <div class="top-panel-title">
+          <h2>Artis Avotins</h2>
+          <div class="top-panel-subtitle">Builder & Programmer</div>
         </div>
       </div>
-      <div style="display: flex; gap: 8px;">
-        <div
-          class="sunken-panel"
-          style="padding: 8px; background: #fff; border: 1px inset #c0c0c0; flex: 1;"
-        >
-          <div style="font-size: 12px; color: #000;">
+      <div class="top-panel-body">
+        <div class="sunken-panel top-panel-info">
+          <div>
             <strong>Experience:</strong> Yes<br />
             <strong>Location:</strong> Remote / The EU<br />
             <strong>Website:</strong> New age fun with a vintage feel<br />
             <strong>Contact:</strong> Send me an email
           </div>
         </div>
-        <div
-          class="sunken-panel"
-          style="padding: 4px; background: #fff; border: 1px inset #c0c0c0; display: flex; align-items: center; justify-content: center;"
-        >
-          <img
-            src="/hamster-dance.gif"
-            alt="Hamster Dance"
-            style="width: 64px; height: 64px; object-fit: contain;"
-          />
+        <div class="sunken-panel top-panel-image">
+          <img src="/hamster-dance.gif" alt="Hamster Dance" />
         </div>
       </div>
     </div>
 
-    <fieldset style="margin-bottom: 16px;">
+    <fieldset class="about-me-fieldset">
       <legend>💬 About Me</legend>
-      <div
-        class="sunken-panel"
-        style="padding: 12px; background: #fff; margin-bottom: 12px;"
-      >
-        <div
-          style="font-size: 16px; font-weight: bold; color: #000080; margin-bottom: 8px;"
-        >
+      <div class="sunken-panel about-me-panel">
+        <div class="about-me-title">
           👋 Hi, I'm Artis. Welcome to my website!
         </div>
-        <div style="font-size: 14px; line-height: 1.4; color: #000;">
+        <div class="about-me-text">
           I'm a generalist with about two decades of experience in the software
           industry. I've worked for startups and large corporations.<br />
           I specialize in building pragmatic software products using modern tools
@@ -79,16 +54,11 @@ const lastUpdated = new Date().toLocaleDateString('en-US', {
         </div>
       </div>
 
-      <div
-        class="sunken-panel"
-        style="padding: 12px; background: #fff; margin-bottom: 12px;"
-      >
-        <div
-          style="font-size: 14px; font-weight: bold; color: #000080; margin-bottom: 6px;"
-        >
+      <div class="sunken-panel about-me-panel">
+        <div class="technical-focus-title">
           🛠️ Technical Focus
         </div>
-        <div style="font-size: 13px; line-height: 1.4; color: #000;">
+        <div class="technical-focus-text">
           My tech stack of choice includes Python and JavaScript (TypeScript
           actually) for backend development, with Django, Flask, DRF, Express,
           and/or Next.js. For frontend, I use React, Preact, Astro, next.js or
@@ -98,13 +68,11 @@ const lastUpdated = new Date().toLocaleDateString('en-US', {
         </div>
       </div>
 
-      <div class="sunken-panel" style="padding: 12px; background: #fff;">
-        <div
-          style="font-size: 14px; font-weight: bold; color: #000080; margin-bottom: 6px;"
-        >
+      <div class="sunken-panel about-me-panel">
+        <div class="experience-interests-title">
           🎯 Experience & Interests
         </div>
-        <div style="font-size: 13px; line-height: 1.4; color: #000;">
+        <div class="experience-interests-text">
           I've worked as an individual contributor, engineering manager, and
           consultant. On the hardware side, I enjoy building small projects with
           Arduino, Raspberry Pi, and ESP32. I also like tinkering with Lego
