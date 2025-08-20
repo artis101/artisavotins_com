@@ -51,11 +51,17 @@ const GameBoard: React.FC<GameBoardProps> = ({ board, config, onCellClick, onCel
       : Array(config.boardSize * config.boardSize).fill(null);
 
   return (
-    <div className="minesweeper-game-board">
+    <div
+      className="minesweeper-game-board"
+      style={{
+        height: `${config.boardSize * 24 + 16}px`,
+      }}
+    >
       <div
         className="minesweeper-game-grid"
         style={{
           gridTemplateColumns: `repeat(${config.boardSize}, 24px)`,
+          height: `${config.boardSize * 24}px`,
         }}
       >
         {cells.map((cell, index) => {
