@@ -33,7 +33,7 @@ type Action =
   | { type: "CHORD_CLICK"; payload: Position };
 
 const initialState = (config: GameConfig): State => ({
-  board: createBoard(config, { x: -1, y: -1 }),
+  board: [],
   gameState: "playing",
   flags: config.numMines,
   time: 0,
@@ -52,9 +52,8 @@ const reducer = produce((draft: State, action: Action) => {
         return;
       }
 
-      if (draft.board.every((cell) => !cell.isMine)) {
-        placeMines(draft.board, draft.config, action.payload);
-        calculateAdjacentMines(draft.board, draft.config.boardSize);
+      if (draft.board.length === 0) {
+        draft.board = createBoard(draft.config, action.payload);
       }
 
       const index = getCellIndex(
