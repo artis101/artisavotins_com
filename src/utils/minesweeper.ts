@@ -19,8 +19,12 @@ const initializeEmptyBoard = (boardSize: number): Board => {
     });
 };
 
-const placeMines = (board: Board, config: GameConfig, firstClick: Position): void => {
+export const placeMines = (board: Board, config: GameConfig, firstClick: Position): void => {
   const { boardSize, numMines } = config;
+  if (firstClick.x === -1 && firstClick.y === -1) {
+    // Don't place mines
+    return;
+  }
   const firstClickIndex = firstClick.y * boardSize + firstClick.x;
   const possibleMineLocations = Array.from(
     { length: boardSize * boardSize },
@@ -43,7 +47,7 @@ const placeMines = (board: Board, config: GameConfig, firstClick: Position): voi
   }
 };
 
-const calculateAdjacentMines = (board: Board, boardSize: number): void => {
+export const calculateAdjacentMines = (board: Board, boardSize: number): void => {
   for (let i = 0; i < board.length; i++) {
     if (!board[i].isMine) {
       board[i].adjacentMines = getAdjacentMines(

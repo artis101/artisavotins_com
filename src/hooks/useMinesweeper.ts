@@ -13,6 +13,8 @@ import {
   checkWinCondition,
   getCellIndex,
   getAdjacentCells,
+  placeMines,
+  calculateAdjacentMines,
 } from "../utils/minesweeper";
 
 type State = {
@@ -31,7 +33,7 @@ type Action =
   | { type: "CHORD_CLICK"; payload: Position };
 
 const initialState = (config: GameConfig): State => ({
-  board: [],
+  board: createBoard(config, { x: -1, y: -1 }),
   gameState: "playing",
   flags: config.numMines,
   time: 0,
@@ -50,8 +52,9 @@ const reducer = produce((draft: State, action: Action) => {
         return;
       }
 
-      if (draft.board.length === 0) {
-        draft.board = createBoard(draft.config, action.payload);
+      if (draft.board.every((cell) => !cell.isMine)) {
+        placeMines(draft.board, draft.config, action.payload);
+        calculateAdjacentMines(draft.board, draft.config.boardSize);
       }
 
       const index = getCellIndex(
