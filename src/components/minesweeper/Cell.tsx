@@ -1,6 +1,5 @@
 import React from "react";
 import type { Cell as CellType } from "../../types/minesweeper";
-import styles from "../../styles/minesweeper.module.css";
 
 interface CellProps {
   cell: CellType | null;
@@ -23,24 +22,24 @@ const getCellContent = (cell: CellType | null): string => {
 };
 
 const getCellClassName = (cell: CellType | null): string => {
-  let className = styles.minesweeperCell;
+  let className = "minesweeper-cell";
 
   if (!cell) {
-    return `${className} ${styles.minesweeperCellHidden}`;
+    return `${className} minesweeper-cell--hidden`;
   }
 
   if (cell.isRevealed) {
-    className += ` ${styles.minesweeperCellRevealed}`;
+    className += " minesweeper-cell--revealed";
     if (cell.isMine) {
-      className += ` ${styles.minesweeperCellMine}`;
+      className += " minesweeper-cell--mine";
       if (cell.isLosingMine) {
-        className += ` ${styles.minesweeperCellLosingMine}`;
+        className += " minesweeper-cell--losing-mine";
       }
     } else if (cell.adjacentMines > 0) {
-      className += ` ${styles[`minesweeperCellAdjacent${cell.adjacentMines}`]}`;
+      className += ` minesweeper-cell--adjacent-${cell.adjacentMines}`;
     }
   } else {
-    className += ` ${styles.minesweeperCellHidden}`;
+    className += " minesweeper-cell--hidden";
   }
 
   return className;

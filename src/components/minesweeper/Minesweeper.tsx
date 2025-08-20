@@ -1,11 +1,10 @@
 import React, { useState } from "react";
-import GameBoard from "./minesweeper/GameBoard";
-import StatusPanel from "./minesweeper/StatusPanel";
-import DifficultySelector from "./minesweeper/DifficultySelector";
-import type { Difficulty } from "../types/difficulty";
-import { useMinesweeper } from "../hooks/useMinesweeper";
-import styles from "../styles/minesweeper.module.css";
-import { DIFFICULTIES } from "../constants/minesweeper";
+import GameBoard from "./GameBoard";
+import StatusPanel from "./StatusPanel";
+import DifficultySelector from "./DifficultySelector";
+import type { Difficulty } from "../../types/difficulty";
+import { useMinesweeper } from "../../hooks/useMinesweeper";
+import { DIFFICULTIES } from "../../constants/minesweeper";
 
 const Minesweeper = () => {
   const [difficulty, setDifficulty] = useState<Difficulty>("easy");
@@ -27,10 +26,10 @@ const Minesweeper = () => {
   } = useMinesweeper(DIFFICULTIES[difficulty]);
 
   return (
-    <div className={styles.window} style={{ margin: "20px", maxWidth: "fit-content" }}>
-      <div className={styles.titleBar} style={{ padding: "2px 4px" }}>
-        <div className={styles.titleBarText}>Minesweeper</div>
-        <div className={styles.titleBarControls}>
+    <div className="window" style={{ margin: "20px", maxWidth: "fit-content" }}>
+      <div className="title-bar" style={{ padding: "2px 4px" }}>
+        <div className="title-bar-text">Minesweeper</div>
+        <div className="title-bar-controls">
           {/* <button aria-label="Minimize"></button>
           <button aria-label="Maximize"></button> */}
           <button
@@ -39,7 +38,7 @@ const Minesweeper = () => {
           ></button>
         </div>
       </div>
-      <div className={styles.windowBody}>
+      <div className="window-body">
         <DifficultySelector onSelectDifficulty={handleSelectDifficulty} />
         <StatusPanel
           flags={flags}
