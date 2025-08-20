@@ -1,6 +1,5 @@
 import React from "react";
 import type { GameState } from "../../types/minesweeper";
-import styles from "../../styles/minesweeper.module.css";
 
 interface StatusPanelProps {
   flags: number;
@@ -28,14 +27,14 @@ const StatusPanel: React.FC<StatusPanelProps> = ({
   onReset,
 }) => {
   return (
-    <div className={styles.minesweeperStatusPanel}>
-      <div className={styles.minesweeperDigitalDisplay}>
+    <div className="minesweeper-status-panel">
+      <div className="minesweeper-digital-display">
         {String(flags).padStart(3, "0")}
       </div>
-      <button className={styles.minesweeperSmileyButton} onClick={onReset}>
+      <button className="minesweeper-smiley-button" onClick={onReset}>
         {getSmileyEmoji(gameState)}
       </button>
-      <div className={styles.minesweeperDigitalDisplay}>
+      <div className="minesweeper-digital-display">
         {String(time).padStart(3, "0")}
       </div>
     </div>

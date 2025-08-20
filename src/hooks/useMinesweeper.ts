@@ -137,17 +137,16 @@ const reducer = produce((draft: State, action: Action) => {
         action.payload.y,
         draft.config.boardSize
       );
-      const cell = draft.board[index];
 
-      if (cell.isRevealed) {
+      if (draft.board[index].isRevealed) {
         return;
       }
 
-      if (cell.isFlagged) {
-        cell.isFlagged = false;
+      if (draft.board[index].isFlagged) {
+        draft.board[index].isFlagged = false;
         draft.flags++;
       } else if (draft.flags > 0) {
-        cell.isFlagged = true;
+        draft.board[index].isFlagged = true;
         draft.flags--;
       }
 
@@ -171,7 +170,7 @@ export const useMinesweeper = (config: GameConfig) => {
       }, 1000);
     }
     return () => clearInterval(interval);
-  }, [state.gameState, state.board, state.time]);
+  }, [state.gameState, state.board]);
 
   const resetGame = (newConfig: GameConfig) => dispatch({ type: "RESET", payload: newConfig });
   const handleCellClick = (x: number, y: number) =>

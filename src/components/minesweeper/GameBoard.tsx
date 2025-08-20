@@ -1,7 +1,6 @@
 import React from "react";
 import Cell from "./Cell";
 import type { Board, GameConfig } from "../../types/minesweeper";
-import styles from "../../styles/minesweeper.module.css";
 
 interface GameBoardProps {
   board: Board;
@@ -19,9 +18,9 @@ const GameBoard: React.FC<GameBoardProps> = ({ board, config, onCellClick, onCel
       : Array(config.boardSize * config.boardSize).fill(null);
 
   return (
-    <div className={styles.minesweeperGameBoard}>
+    <div className="minesweeper-game-board">
       <div
-        className={styles.minesweeperGameGrid}
+        className="minesweeper-game-grid"
         style={{
           gridTemplateColumns: `repeat(${config.boardSize}, 24px)`,
         }}
