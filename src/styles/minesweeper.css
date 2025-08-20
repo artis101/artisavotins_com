@@ -118,6 +118,12 @@
   display: inline-block;
 }
 
+.minesweeper-board-container {
+  display: flex;
+  justify-content: center;
+  margin: 0 auto;
+}
+
 .minesweeper-game-grid {
   display: grid;
   gap: 0;

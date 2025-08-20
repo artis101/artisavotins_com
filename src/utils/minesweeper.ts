@@ -139,14 +139,47 @@ export const revealAllMines = (board: Board): void => {
   }
 };
 
-export const checkWinCondition = (board: Board): boolean => {
+export const flagAllMines = (board: Board): void => {
   for (let i = 0; i < board.length; i++) {
-    const cell = board[i];
-    if (!cell.isMine && !cell.isRevealed) {
-      return false;
+    if (board[i].isMine && !board[i].isFlagged) {
+      board[i].isFlagged = true;
     }
   }
-  return true;
+};
+
+export const revealAllSafeCells = (board: Board): void => {
+  for (let i = 0; i < board.length; i++) {
+    if (!board[i].isMine && !board[i].isRevealed) {
+      board[i].isRevealed = true;
+    }
+  }
+};
+
+export const checkWinCondition = (board: Board): boolean => {
+  if (board.length === 0) return false;
+  
+  let hasUnrevealedSafeCells = false;
+  let hasUnflaggedMines = false;
+  
+  for (let i = 0; i < board.length; i++) {
+    const cell = board[i];
+    
+    // Check for unrevealed safe cells
+    if (!cell.isMine && !cell.isRevealed) {
+      hasUnrevealedSafeCells = true;
+    }
+    
+    // Check for unflagged mines
+    if (cell.isMine && !cell.isFlagged) {
+      hasUnflaggedMines = true;
+    }
+  }
+  
+  // Win if either all safe cells are revealed OR all mines are correctly flagged
+  const allSafeCellsRevealed = !hasUnrevealedSafeCells;
+  const allMinesFlagged = !hasUnflaggedMines;
+  
+  return allSafeCellsRevealed || allMinesFlagged;
 };
 
 export const getCellIndex = (

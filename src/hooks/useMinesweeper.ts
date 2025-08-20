@@ -10,6 +10,8 @@ import {
   createBoard,
   revealCell,
   revealAllMines,
+  flagAllMines,
+  revealAllSafeCells,
   checkWinCondition,
   getCellIndex,
   getAdjacentCells,
@@ -21,13 +23,11 @@ type State = {
   board: Board;
   gameState: GameState;
   flags: number;
-  time: number;
   config: GameConfig;
 };
 
 type Action =
   | { type: "RESET"; payload: GameConfig }
-  | { type: "SET_TIME"; payload: number }
   | { type: "CELL_CLICK"; payload: Position }
   | { type: "CELL_RIGHT_CLICK"; payload: Position }
   | { type: "CHORD_CLICK"; payload: Position };
@@ -36,17 +36,13 @@ const initialState = (config: GameConfig): State => ({
   board: [],
   gameState: "playing",
   flags: config.numMines,
-  time: 0,
-  config,
+    config,
 });
 
 const reducer = produce((draft: State, action: Action) => {
   switch (action.type) {
     case "RESET":
       return initialState(action.payload);
-    case "SET_TIME":
-      draft.time = action.payload;
-      break;
     case "CELL_CLICK": {
       if (draft.gameState !== "playing") {
         return;
@@ -78,6 +74,9 @@ const reducer = produce((draft: State, action: Action) => {
 
       if (checkWinCondition(draft.board)) {
         draft.gameState = "won";
+        flagAllMines(draft.board);
+        revealAllSafeCells(draft.board);
+        draft.flags = 0; // All mines are now flagged
       }
 
       break;
@@ -126,6 +125,8 @@ const reducer = produce((draft: State, action: Action) => {
         
         if (!hitMine && checkWinCondition(draft.board)) {
           draft.gameState = "won";
+          flagAllMines(draft.board);
+          draft.flags = 0; // All mines are now flagged
         }
       }
 
@@ -154,6 +155,14 @@ const reducer = produce((draft: State, action: Action) => {
         draft.flags--;
       }
 
+      // Check win condition after flagging/unflagging
+      if (checkWinCondition(draft.board)) {
+        draft.gameState = "won";
+        flagAllMines(draft.board);
+        revealAllSafeCells(draft.board);
+        draft.flags = 0; // All mines are now flagged
+      }
+
       break;
     }
   }
@@ -166,15 +175,6 @@ export const useMinesweeper = (config: GameConfig) => {
     dispatch({ type: "RESET", payload: config });
   }, [config]);
 
-  useEffect(() => {
-    let interval: NodeJS.Timeout | undefined;
-    if (state.gameState === "playing" && state.board.length > 0) {
-      interval = setInterval(() => {
-        dispatch({ type: "SET_TIME", payload: state.time + 1 });
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [state.gameState, state.board]);
 
   const resetGame = (newConfig: GameConfig) => dispatch({ type: "RESET", payload: newConfig });
   const handleCellClick = (x: number, y: number) =>
