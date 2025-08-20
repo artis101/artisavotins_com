@@ -3,27 +3,30 @@ import { render, screen } from '@testing-library/react';
 import StatusPanel from './StatusPanel';
 
 describe('StatusPanel', () => {
-  it('should render the flags and time', () => {
+  it('should render the flags', () => {
     render(
       <StatusPanel
         flags={10}
-        time={20}
         gameState="playing"
         onReset={() => {}}
+        isTimerRunning={false}
+        onTimeChange={() => {}}
+        shouldResetTimer={false}
       />
     );
 
     expect(screen.getByText('010')).toBeInTheDocument();
-    expect(screen.getByText('020')).toBeInTheDocument();
   });
 
   it('should render the correct smiley based on the game state', () => {
     const { rerender } = render(
       <StatusPanel
         flags={10}
-        time={20}
         gameState="playing"
         onReset={() => {}}
+        isTimerRunning={false}
+        onTimeChange={() => {}}
+        shouldResetTimer={false}
       />
     );
 
@@ -32,9 +35,11 @@ describe('StatusPanel', () => {
     rerender(
       <StatusPanel
         flags={10}
-        time={20}
         gameState="won"
         onReset={() => {}}
+        isTimerRunning={false}
+        onTimeChange={() => {}}
+        shouldResetTimer={false}
       />
     );
 
@@ -43,9 +48,11 @@ describe('StatusPanel', () => {
     rerender(
       <StatusPanel
         flags={10}
-        time={20}
         gameState="lost"
         onReset={() => {}}
+        isTimerRunning={false}
+        onTimeChange={() => {}}
+        shouldResetTimer={false}
       />
     );
 
