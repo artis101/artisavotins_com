@@ -1,6 +1,10 @@
 import type { GameConfig } from '../types/minesweeper';
 
 export const DIFFICULTIES: Record<string, GameConfig> = {
+  trivial: {
+    boardSize: 3,
+    numMines: 2,
+  },
   easy: {
     boardSize: 10,
     numMines: 10,

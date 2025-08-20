@@ -52,32 +52,34 @@ const GameBoard: React.FC<GameBoardProps> = ({ board, config, onCellClick, onCel
       : Array(config.boardSize * config.boardSize).fill(null);
 
   return (
-    <div
-      className="minesweeper-game-board"
-    >
+    <div className="minesweeper-board-container">
       <div
-        className="minesweeper-game-grid"
-        style={{
-          gridTemplateColumns: `repeat(${config.boardSize}, 24px)`,
-        }}
+        className="minesweeper-game-board"
       >
-        {cells.map((cell, index) => {
-          const x = index % config.boardSize;
-          const y = Math.floor(index / config.boardSize);
-          return (
-            <div
-              key={index}
-              data-testid={`cell-${x}-${y}`}
-              role="button"
-              onClick={() => onCellClick(x, y)}
-              onContextMenu={(e) => onCellRightClick(e, x, y)}
-              onMouseDown={(e) => onCellMouseDown(e, x, y)}
-              className={getCellClassName(cell)}
-            >
-              {getCellContent(cell)}
-            </div>
-          );
-        })}
+        <div
+          className="minesweeper-game-grid"
+          style={{
+            gridTemplateColumns: `repeat(${config.boardSize}, 24px)`,
+          }}
+        >
+          {cells.map((cell, index) => {
+            const x = index % config.boardSize;
+            const y = Math.floor(index / config.boardSize);
+            return (
+              <div
+                key={index}
+                data-testid={`cell-${x}-${y}`}
+                role="button"
+                onClick={() => onCellClick(x, y)}
+                onContextMenu={(e) => onCellRightClick(e, x, y)}
+                onMouseDown={(e) => onCellMouseDown(e, x, y)}
+                className={getCellClassName(cell)}
+              >
+                {getCellContent(cell)}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
