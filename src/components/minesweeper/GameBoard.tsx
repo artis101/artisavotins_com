@@ -1,6 +1,5 @@
 import React from "react";
-import Cell from "./Cell";
-import type { Board, GameConfig } from "../../types/minesweeper";
+import type { Board, GameConfig, Cell as CellType } from "../../types/minesweeper";
 
 interface GameBoardProps {
   board: Board;
@@ -10,6 +9,40 @@ interface GameBoardProps {
   onCellMouseDown: (e: React.MouseEvent, x: number, y: number) => void;
   disabled: boolean;
 }
+
+const getCellContent = (cell: CellType | null): string => {
+  if (!cell) return "";
+  if (cell.isFlagged) return "🚩";
+  if (cell.isRevealed) {
+    if (cell.isMine) return "💣";
+    if (cell.adjacentMines > 0) return cell.adjacentMines.toString();
+  }
+  return "";
+};
+
+const getCellClassName = (cell: CellType | null): string => {
+  let className = "minesweeper-cell";
+
+  if (!cell) {
+    return `${className} minesweeper-cell--hidden`;
+  }
+
+  if (cell.isRevealed) {
+    className += " minesweeper-cell--revealed";
+    if (cell.isMine) {
+      className += " minesweeper-cell--mine";
+      if (cell.isLosingMine) {
+        className += " minesweeper-cell--losing-mine";
+      }
+    } else if (cell.adjacentMines > 0) {
+      className += ` minesweeper-cell--adjacent-${cell.adjacentMines}`;
+    }
+  } else {
+    className += " minesweeper-cell--hidden";
+  }
+
+  return className;
+};
 
 const GameBoard: React.FC<GameBoardProps> = ({ board, config, onCellClick, onCellRightClick, onCellMouseDown, disabled }) => {
   const cells =
@@ -29,16 +62,17 @@ const GameBoard: React.FC<GameBoardProps> = ({ board, config, onCellClick, onCel
           const x = index % config.boardSize;
           const y = Math.floor(index / config.boardSize);
           return (
-            <Cell
+            <div
               key={index}
-              cell={cell}
-              onCellClick={onCellClick}
-              onCellRightClick={onCellRightClick}
-              onCellMouseDown={onCellMouseDown}
-              x={x}
-              y={y}
-              disabled={disabled}
-            />
+              data-testid={`cell-${x}-${y}`}
+              role="button"
+              onClick={() => onCellClick(x, y)}
+              onContextMenu={(e) => onCellRightClick(e, x, y)}
+              onMouseDown={(e) => onCellMouseDown(e, x, y)}
+              className={getCellClassName(cell)}
+            >
+              {getCellContent(cell)}
+            </div>
           );
         })}
       </div>
