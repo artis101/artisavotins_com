@@ -1,0 +1,121 @@
+.top-panel {
+  padding: 16px;
+  margin-bottom: 16px;
+  background: #c0c0c0;
+}
+
+.top-panel-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.top-panel-icon {
+  width: 32px;
+  height: 32px;
+  background: #c0c0c0;
+  border: 2px outset #c0c0c0;
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.top-panel-icon span {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.top-panel-title h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: bold;
+  color: #000080;
+}
+
+.top-panel-subtitle {
+  font-size: 14px;
+  color: #666;
+  margin-top: 2px;
+}
+
+.top-panel-body {
+  display: flex;
+  gap: 8px;
+}
+
+.top-panel-info {
+  padding: 8px;
+  background: #fff;
+  border: 1px inset #c0c0c0;
+  flex: 1;
+}
+
+.top-panel-info div {
+  font-size: 12px;
+  color: #000;
+}
+
+.top-panel-image {
+  padding: 4px;
+  background: #fff;
+  border: 1px inset #c0c0c0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.top-panel-image img {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+}
+
+.about-me-fieldset {
+  margin-bottom: 16px;
+}
+
+.about-me-panel {
+  padding: 12px;
+  background: #fff;
+  margin-bottom: 12px;
+}
+
+.about-me-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #000080;
+  margin-bottom: 8px;
+}
+
+.about-me-text {
+  font-size: 14px;
+  line-height: 1.4;
+  color: #000;
+}
+
+.technical-focus-title {
+  font-size: 14px;
+  font-weight: bold;
+  color: #000080;
+  margin-bottom: 6px;
+}
+
+.technical-focus-text {
+  font-size: 13px;
+  line-height: 1.4;
+  color: #000;
+}
+
+.experience-interests-title {
+  font-size: 14px;
+  font-weight: bold;
+  color: #000080;
+  margin-bottom: 6px;
+}
+
+.experience-interests-text {
+  font-size: 13px;
+  line-height: 1.4;
+  color: #000;
+}

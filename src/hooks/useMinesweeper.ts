@@ -107,8 +107,9 @@ const reducer = produce((draft: State, action: Action) => {
       const flaggedCells = adjacentCells.filter((c) => c.isFlagged);
 
       if (flaggedCells.length === cell.adjacentMines) {
+        let hitMine = false;
         adjacentCells.forEach((adjacentCell) => {
-          if (!adjacentCell.isFlagged && !adjacentCell.isRevealed) {
+          if (!adjacentCell.isFlagged && !adjacentCell.isRevealed && !hitMine) {
             revealCell(
               draft.board,
               adjacentCell.x,
@@ -118,13 +119,14 @@ const reducer = produce((draft: State, action: Action) => {
             if (adjacentCell.isMine) {
               revealAllMines(draft.board);
               draft.gameState = "lost";
+              hitMine = true;
             }
           }
         });
-      }
-
-      if (checkWinCondition(draft.board)) {
-        draft.gameState = "won";
+        
+        if (!hitMine && checkWinCondition(draft.board)) {
+          draft.gameState = "won";
+        }
       }
 
       break;

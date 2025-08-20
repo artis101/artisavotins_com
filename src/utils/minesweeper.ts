@@ -1,7 +1,5 @@
 import type { Board, Cell, Position, GameConfig } from "../types/minesweeper";
 
-import type { Board, Cell, Position, GameConfig } from "../types/minesweeper";
-
 const initializeEmptyBoard = (boardSize: number): Board => {
   return Array(boardSize * boardSize)
     .fill(null)
@@ -21,10 +19,13 @@ const initializeEmptyBoard = (boardSize: number): Board => {
 
 export const placeMines = (board: Board, config: GameConfig, firstClick: Position): void => {
   const { boardSize, numMines } = config;
-  if (firstClick.x === -1 && firstClick.y === -1) {
-    // Don't place mines
+  if (boardSize <= 0 || numMines < 0) {
     return;
   }
+  
+  const maxMines = boardSize * boardSize - 1;
+  const actualNumMines = Math.min(numMines, maxMines);
+  
   const firstClickIndex = firstClick.y * boardSize + firstClick.x;
   const possibleMineLocations = Array.from(
     { length: boardSize * boardSize },
@@ -41,7 +42,7 @@ export const placeMines = (board: Board, config: GameConfig, firstClick: Positio
   }
 
   // Place mines
-  for (let i = 0; i < numMines; i++) {
+  for (let i = 0; i < actualNumMines; i++) {
     const mineIndex = possibleMineLocations[i];
     board[mineIndex].isMine = true;
   }
