@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "../../styles/minesweeper.css";
+import "../../styles/components.css";
 import GameBoard from "./GameBoard";
 import StatusPanel from "./StatusPanel";
 import DifficultySelector from "./DifficultySelector";
@@ -27,34 +28,36 @@ const Minesweeper = () => {
   } = useMinesweeper(DIFFICULTIES[difficulty]);
 
   return (
-    <div className="window" style={{ margin: "20px", maxWidth: "fit-content" }}>
-      <div className="title-bar" style={{ padding: "2px 4px" }}>
-        <div className="title-bar-text">Minesweeper</div>
-        <div className="title-bar-controls">
-          {/* <button aria-label="Minimize"></button>
-          <button aria-label="Maximize"></button> */}
-          <button
-            aria-label="Close"
-            onClick={() => (window.location.href = "/")}
-          ></button>
+    <div className="minesweeper-window">
+      <div className="window">
+        <div className="title-bar">
+          <div className="title-bar-text">Minesweeper</div>
+          <div className="title-bar-controls">
+            {/* <button aria-label="Minimize"></button>
+            <button aria-label="Maximize"></button> */}
+            <button
+              aria-label="Close"
+              onClick={() => (window.location.href = "/")}
+            ></button>
+          </div>
         </div>
-      </div>
-      <div className="window-body">
-        <DifficultySelector onSelectDifficulty={handleSelectDifficulty} />
-        <StatusPanel
-          flags={flags}
-          time={time}
-          gameState={gameState}
-          onReset={() => resetGame(DIFFICULTIES[difficulty])}
-        />
-        <GameBoard
-          board={board}
-          config={config}
-          onCellClick={handleCellClick}
-          onCellRightClick={handleCellRightClick}
-          onCellMouseDown={handleCellMouseDown}
-          disabled={gameState === "won" || gameState === "lost"}
-        />
+        <div className="window-body">
+          <DifficultySelector onSelectDifficulty={handleSelectDifficulty} />
+          <StatusPanel
+            flags={flags}
+            time={time}
+            gameState={gameState}
+            onReset={() => resetGame(DIFFICULTIES[difficulty])}
+          />
+          <GameBoard
+            board={board}
+            config={config}
+            onCellClick={handleCellClick}
+            onCellRightClick={handleCellRightClick}
+            onCellMouseDown={handleCellMouseDown}
+            disabled={gameState === "won" || gameState === "lost"}
+          />
+        </div>
       </div>
     </div>
   );

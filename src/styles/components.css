@@ -1,0 +1,32 @@
+.thank-you-banner .window {
+  margin: 20px auto;
+  max-width: 400px;
+}
+
+.thank-you-banner .window-body {
+  text-align: center;
+  padding: 20px;
+}
+
+.thank-you-banner p {
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.thank-you-banner button {
+  min-width: 80px;
+}
+
+.difficulty-selector {
+  text-align: center;
+  padding: 0 0 10px;
+}
+
+.minesweeper-window .window {
+  margin: 20px;
+  max-width: fit-content;
+}
+
+.minesweeper-window .title-bar {
+  padding: 2px 4px;
+}
