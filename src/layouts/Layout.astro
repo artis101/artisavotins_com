@@ -74,8 +74,20 @@ const { title } = Astro.props;
   .status-bar-field {
     font-size: 12px;
   }
-  .tree-view {
-    font-size: 13px;
+  /* Skills tree keeps the 98.css pixel font as a deliberate accent.
+     Use ul.tree-view to match 98.css's own specificity (0,1,1) so our
+     size/line-height actually win. */
+  ul.tree-view,
+  ul.tree-view * {
+    font-family: "Pixelated MS Sans Serif", Arial;
+    -webkit-font-smoothing: none;
+  }
+  ul.tree-view {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  ul.tree-view li {
+    padding: 1px 0;
   }
 
   /* WindowWithClose is rendered inside <astro-island>; center that,

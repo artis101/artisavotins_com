@@ -33,9 +33,34 @@ const lastUpdated = new Date().toLocaleDateString('en-US', {
             <strong>Contact:</strong> Send me an email
           </div>
         </div>
-        <div class="sunken-panel top-panel-image">
+        <div
+          class="sunken-panel top-panel-image hamster-tile"
+          role="button"
+          tabindex="0"
+          aria-label="Reveal hacker emblem"
+        >
           <img src="/hamster-dance.gif" alt="Hamster Dance" />
+          <div class="glider-overlay" aria-hidden="true">
+            <span class="glider-dot" style="--i: 0; grid-area: 1 / 2;"></span>
+            <span class="glider-dot" style="--i: 1; grid-area: 2 / 3;"></span>
+            <span class="glider-dot" style="--i: 2; grid-area: 3 / 1;"></span>
+            <span class="glider-dot" style="--i: 3; grid-area: 3 / 2;"></span>
+            <span class="glider-dot" style="--i: 4; grid-area: 3 / 3;"></span>
+          </div>
         </div>
+        <script>
+          const tile = document.querySelector(".hamster-tile");
+          if (tile) {
+            const toggle = () => tile.classList.toggle("play");
+            tile.addEventListener("click", toggle);
+            tile.addEventListener("keydown", (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                toggle();
+              }
+            });
+          }
+        </script>
       </div>
     </div>
 

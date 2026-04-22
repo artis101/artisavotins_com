@@ -45,7 +45,8 @@
 }
 
 .top-panel-body {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto;
   gap: 12px;
   align-items: stretch;
 }
@@ -64,13 +65,16 @@
 }
 
 .top-panel-image {
-  padding: 6px;
+  aspect-ratio: 1 / 1;
+  padding: 12px;
+  box-sizing: border-box;
   background: #fff;
   border: 1px inset #c0c0c0;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex: 0 0 auto;
+  position: relative;
+  overflow: hidden; /* kill inherited scrollbars from 98.css .sunken-panel */
 }
 
 .top-panel-image img {
@@ -78,6 +82,72 @@
   height: 72px;
   object-fit: contain;
   image-rendering: pixelated;
+  display: block;
+}
+
+/* Hacker-emblem overlay: a 3x3 grid aligned to the hamster img.
+   Five dots form the glider pattern (Conway's Game of Life). */
+.hamster-tile {
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hamster-tile:focus-visible {
+  outline: 2px dotted #000080;
+  outline-offset: 2px;
+}
+
+.glider-overlay {
+  /* Pinned to the hamster image's own footprint (72x72) and centered in the
+     tile, so dots stay aligned to the hamster no matter how tall the tile
+     stretches to match the info panel. */
+  position: absolute;
+  width: 72px;
+  height: 72px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  pointer-events: none;
+}
+
+.glider-dot {
+  display: block;
+  aspect-ratio: 1 / 1;
+  width: 55%;
+  place-self: center;
+  background: #000;
+  border-radius: 50%;
+  transform: scale(0);
+  opacity: 0;
+  transition:
+    opacity 200ms ease,
+    transform 260ms cubic-bezier(0.5, 1.6, 0.4, 1);
+  transition-delay: 0ms; /* instant fade-out on hover leave */
+}
+
+/* Staggered pop-IN on hover / focus / tap-toggle; stays until trigger ends */
+.hamster-tile:hover .glider-dot,
+.hamster-tile:focus-visible .glider-dot,
+.hamster-tile.play .glider-dot {
+  opacity: 1;
+  transform: scale(1);
+  transition-delay: calc(var(--i, 0) * 120ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glider-dot {
+    transition: opacity 200ms ease;
+    transform: scale(1);
+  }
+  .hamster-tile:hover .glider-dot,
+  .hamster-tile:focus-visible .glider-dot,
+  .hamster-tile.play .glider-dot {
+    transition-delay: 0ms;
+  }
 }
 
 .about-me-fieldset {
