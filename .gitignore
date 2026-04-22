@@ -18,8 +18,8 @@ pnpm-debug.log*
 .env.*
 !.env.example
 
-# lockfiles from other package managers (this project is npm)
-pnpm-lock.yaml
+# lockfiles from other package managers (this project is pnpm)
+package-lock.json
 yarn.lock
 
 # editor / tooling

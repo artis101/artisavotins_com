@@ -6,10 +6,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 | Command | Action |
 | :-- | :-- |
-| `npm run dev` | Starts local dev server at `localhost:4321` |
-| `npm run build` | Build production site to `./dist/` |
-| `npm run preview` | Preview build locally before deploying |
-| `npm run astro ...` | Run CLI commands like `astro add`, `astro check` |
+| `pnpm install` | Install dependencies |
+| `pnpm dev` | Starts local dev server at `localhost:4321` |
+| `pnpm build` | Build production site to `./dist/` |
+| `pnpm preview` | Preview build locally before deploying |
+| `pnpm astro ...` | Run CLI commands like `astro add`, `astro check` |
 
 ## Project Architecture
 
