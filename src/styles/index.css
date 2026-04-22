@@ -11,64 +11,73 @@
 }
 
 .top-panel-icon {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   background: #c0c0c0;
   border: 2px outset #c0c0c0;
-  margin-right: 12px;
+  margin-right: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex: 0 0 auto;
 }
 
 .top-panel-icon span {
-  font-size: 16px;
-  font-weight: bold;
+  font-size: 20px;
+  line-height: 1;
 }
 
 .top-panel-title h2 {
   margin: 0;
-  font-size: 18px;
-  font-weight: bold;
+  font-size: 22px;
+  font-weight: 600;
   color: #000080;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
 }
 
 .top-panel-subtitle {
-  font-size: 14px;
-  color: #666;
-  margin-top: 2px;
+  font-size: 13px;
+  color: #555;
+  margin-top: 4px;
+  line-height: 1;
+  letter-spacing: 0.01em;
 }
 
 .top-panel-body {
   display: flex;
-  gap: 8px;
+  gap: 12px;
+  align-items: stretch;
 }
 
 .top-panel-info {
-  padding: 8px;
+  padding: 12px 14px;
   background: #fff;
   border: 1px inset #c0c0c0;
   flex: 1;
+  line-height: 1.65;
 }
 
 .top-panel-info div {
-  font-size: 12px;
-  color: #000;
+  font-size: 13px;
+  color: #1a1a1a;
 }
 
 .top-panel-image {
-  padding: 4px;
+  padding: 6px;
   background: #fff;
   border: 1px inset #c0c0c0;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex: 0 0 auto;
 }
 
 .top-panel-image img {
-  width: 64px;
-  height: 64px;
+  width: 72px;
+  height: 72px;
   object-fit: contain;
+  image-rendering: pixelated;
 }
 
 .about-me-fieldset {
@@ -76,46 +85,101 @@
 }
 
 .about-me-panel {
-  padding: 12px;
+  padding: 16px 18px;
   background: #fff;
   margin-bottom: 12px;
 }
 
+.about-me-panel:last-child {
+  margin-bottom: 0;
+}
+
 .about-me-title {
-  font-size: 16px;
-  font-weight: bold;
+  font-size: 17px;
+  font-weight: 600;
+  color: #000080;
+  margin-bottom: 10px;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.about-me-text,
+.technical-focus-text,
+.experience-interests-text {
+  font-size: 14px;
+  line-height: 1.65;
+  color: #1a1a1a;
+}
+
+.technical-focus-title,
+.experience-interests-title {
+  font-size: 15px;
+  font-weight: 600;
   color: #000080;
   margin-bottom: 8px;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
 }
 
-.about-me-text {
-  font-size: 14px;
-  line-height: 1.4;
-  color: #000;
+@media (max-width: 640px) {
+  .top-panel-body {
+    flex-direction: column;
+  }
+
+  .top-panel-image {
+    align-self: flex-start;
+  }
 }
 
-.technical-focus-title {
-  font-size: 14px;
-  font-weight: bold;
-  color: #000080;
-  margin-bottom: 6px;
+/* Skills tree: 2 columns on wider viewports */
+.tree-view {
+  padding: 4px 0;
 }
 
-.technical-focus-text {
+@media (min-width: 700px) {
+  fieldset > .tree-view {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 32px;
+    row-gap: 2px;
+    align-items: start;
+  }
+}
+
+/* Games section: desktop-shortcut tile on the left, blurb on the right */
+.games-row {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.desktop-shortcut {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border: 1px dotted transparent;
+  text-decoration: none;
+  flex: 0 0 auto;
+}
+
+.desktop-shortcut:hover,
+.desktop-shortcut:focus-visible {
+  border-color: #000080;
+  background: rgba(0, 0, 128, 0.06);
+}
+
+.games-text {
+  flex: 1;
   font-size: 13px;
-  line-height: 1.4;
-  color: #000;
+  line-height: 1.6;
+  color: #1a1a1a;
+  margin: 0;
 }
 
-.experience-interests-title {
-  font-size: 14px;
-  font-weight: bold;
-  color: #000080;
-  margin-bottom: 6px;
-}
-
-.experience-interests-text {
-  font-size: 13px;
-  line-height: 1.4;
-  color: #000;
+@media (max-width: 500px) {
+  .games-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }

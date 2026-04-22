@@ -13,6 +13,12 @@ const { title } = Astro.props;
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="https://unpkg.com/98.css" />
     <title>{title || "Artis Avotins"}</title>
   </head>
@@ -21,11 +27,94 @@ const { title } = Astro.props;
   </body>
 </html>
 
-<style>
+<style is:global>
+  :root {
+    --content-max-width: 960px;
+    --body-font:
+      "IBM Plex Mono", ui-monospace, "SF Mono", "Menlo", "Consolas",
+      "Liberation Mono", monospace;
+  }
+
+  html,
   body {
-    background: #008080;
-    font-family: "MS Sans Serif", sans-serif;
     margin: 0;
-    padding: 20px;
+    padding: 0;
+  }
+
+  body {
+    min-height: 100vh;
+    background: #008080;
+    padding: 32px 16px;
+    box-sizing: border-box;
+    color: #1a1a1a;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* VT323 everywhere — page, chrome, buttons, all of it.
+     High-specificity selector beats 98.css. */
+  html body,
+  html body * {
+    font-family: var(--body-font);
+  }
+
+  /* IBM Plex Mono is slightly wider per glyph than Pixelated MS Sans Serif;
+     bump chrome sizes so labels still breathe. */
+  .title-bar-text {
+    font-size: 13px;
+  }
+  button {
+    font-size: 13px;
+  }
+  fieldset > legend {
+    font-size: 13px;
+    letter-spacing: 0.02em;
+  }
+  .status-bar-field {
+    font-size: 12px;
+  }
+  .tree-view {
+    font-size: 13px;
+  }
+
+  /* WindowWithClose is rendered inside <astro-island>; center that,
+     then the inner .window fills the constrained width. */
+  body > astro-island {
+    display: block;
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+  }
+
+  body > astro-island > .window {
+    box-shadow:
+      0 2px 0 rgba(0, 0, 0, 0.1),
+      0 24px 48px -12px rgba(0, 0, 0, 0.35);
+  }
+
+  /* Body copy spacing */
+  p {
+    line-height: 1.4;
+  }
+
+  /* Give fieldsets a little air */
+  fieldset {
+    padding: 16px 18px;
+  }
+
+  fieldset > legend {
+    padding: 0 6px;
+  }
+
+  /* Make contact buttons feel like buttons when wrapped in anchors */
+  .field-row a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  @media (max-width: 640px) {
+    body {
+      padding: 16px 8px;
+    }
   }
 </style>
