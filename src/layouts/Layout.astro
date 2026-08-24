@@ -1,26 +1,41 @@
 ---
 export interface Props {
   title?: string;
+  description?: string;
 }
 
-const { title } = Astro.props;
+const {
+  title,
+  description = "Artis Avotins — full-stack software engineer. TypeScript, React, Node.js, Python, and a Windows 98 themed corner of the web with a playable Minesweeper.",
+} = Astro.props;
+const siteUrl = "https://artisavotins.com";
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
+    <title>{title || "Artis Avotins"}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={siteUrl} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={siteUrl} />
+    <meta property="og:title" content={title || "Artis Avotins"} />
+    <meta property="og:description" content={description} />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title || "Artis Avotins"} />
+    <meta name="twitter:description" content={description} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="https://unpkg.com/98.css" />
-    <title>{title || "Artis Avotins"}</title>
+    <!-- Pinned: unpkg "latest" once broke sites overnight when 98.css shipped changes -->
+    <link rel="stylesheet" href="https://unpkg.com/98.css@0.1.21/dist/98.css" />
   </head>
   <body>
     <slot />
